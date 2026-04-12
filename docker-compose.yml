@@ -1,8 +1,34 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: family-todo-db
+    environment:
+      POSTGRES_DB: family_todo
+      POSTGRES_USER: family_todo_user
+      POSTGRES_PASSWORD: family_todo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U family_todo_user -d family_todo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
       context: ./backend
     container_name: family-todo-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: family_todo
+      POSTGRES_USER: family_todo_user
+      POSTGRES_PASSWORD: family_todo_password
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
     ports:
       - "8000:8000"
     volumes:
@@ -17,3 +43,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
+volumes:
+  postgres_data:

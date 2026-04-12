@@ -6,6 +6,7 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 
 - Backend: Django 5
 - Frontend: Vue 3 + Vite
+- Database: PostgreSQL 16
 - Container: Docker / Docker Compose
 
 ## ディレクトリ構成
@@ -27,6 +28,14 @@ docker compose up --build
 
 - Backend health check: http://localhost:8000/health/
 - Frontend: http://localhost:5173/
+
+## PostgreSQL 接続情報
+
+- Host: localhost
+- Port: 5432
+- Database: family_todo
+- User: family_todo_user
+- Password: family_todo_password
 
 ## 停止方法
 
