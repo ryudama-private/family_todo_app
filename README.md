@@ -79,7 +79,9 @@ docker compose down
 {
   "errors": {
     "name": "必須項目です。",
-    "password": "必須項目です。"
+    "password": "必須項目です。",
+    "secret_question": "必須項目です。",
+    "secret_answer": "必須項目です。"
   }
 }
 ```
