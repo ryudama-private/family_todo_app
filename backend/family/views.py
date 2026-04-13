@@ -15,30 +15,37 @@ def register(request):
         body = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"error": "リクエストボディが不正です。"}, status=400)
-
-    name = body.get("name", "").strip()
-    password = body.get("password", "").strip()
-    secret_question = body.get("secret_question", "").strip()
-    secret_answer = body.get("secret_answer", "").strip()
+    
+    if not isinstance(body, dict):
+        return JsonResponse({"error": "JSONオブジェクトを指定してください。"}, status=400)
+    
+    fields = {
+        "name": body.get("name"),
+        "password": body.get("password"),
+        "secret_question": body.get("secret_question"),
+        "secret_answer": body.get("secret_answer"),
+    }
 
     errors = {}
-    if not name:
-        errors["name"] = "必須項目です。"
-    if not password:
-        errors["password"] = "必須項目です。"
-    if not secret_question:
-        errors["secret_question"] = "必須項目です。"
-    if not secret_answer:
-        errors["secret_answer"] = "必須項目です。"
+    for field, value in fields.items():
+        if not isinstance(value, str):
+            errors[field] = "文字列で指定してください。"
+        elif not value.strip():
+            errors[field] = "必須項目です。"
 
     if errors:
         return JsonResponse({"errors": errors}, status=400)
+
+    name = fields["name"].strip()
+    password = fields["password"].strip()
+    secret_question = fields["secret_question"].strip()
+    secret_answer = fields["secret_answer"].strip()
 
     family = Family.objects.create(
         name=name,
         password=make_password(password),
         secret_question=secret_question,
-        secret_answer=secret_answer,
+        secret_answer=make_password(secret_answer),
     )
 
     return JsonResponse(
