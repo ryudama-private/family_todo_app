@@ -42,3 +42,60 @@ docker compose up --build
 ```bash
 docker compose down
 ```
+
+## API エンドポイント
+
+| Method | Path           | 説明                     |
+| ------ | -------------- | ------------------------ |
+| POST   | /auth/register | 家族アカウントの新規登録 |
+
+### POST /auth/register
+
+**Request Body (JSON)**
+
+```json
+{
+  "name": "お母さん",
+  "password": "パスワード",
+  "secret_question": "好きな食べ物は？",
+  "secret_answer": "カレー"
+}
+```
+
+**Response 201**
+
+```json
+{
+  "id": 1,
+  "name": "お母さん",
+  "created_at": "2026-04-14T00:00:00+09:00",
+  "updated_at": "2026-04-14T00:00:00+09:00"
+}
+```
+
+**Response 400（必須項目不足）**
+
+```json
+{
+  "errors": {
+    "name": "必須項目です。",
+    "password": "必須項目です。"
+  }
+}
+```
+
+## テスト
+
+コンテナ内で実行（推奨）
+
+```bash
+docker compose exec backend pytest -v
+```
+
+ローカルで実行（Docker起動中に限る）
+
+```bash
+cd backend
+.\.venv\Scripts\Activate.ps1
+$env:POSTGRES_HOST="localhost"; pytest -v
+```
