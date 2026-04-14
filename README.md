@@ -141,6 +141,8 @@ docker compose exec frontend sh -c "npm run test:watch"
 
 Playwright で家族登録画面の総合テストを実行できます。
 
+現在の E2E は、登録成功後に作成した family レコードの id を使って cleanup を行うため、テストが追加したデータだけを終了時に自動削除します。
+
 Docker Compose で実行（推奨）:
 
 ```bash
@@ -163,12 +165,15 @@ UIモードでテストを選択して実行:
 ```bash
 docker compose up -d db backend frontend
 cd frontend
+# bash / zsh の場合
 PW_BASE_URL=http://localhost:5173 npx playwright test --ui
 ```
 
-Windows PowerShell では環境変数を次のように設定します。
+Windows PowerShell では書き方が異なります。
 
 ```powershell
+docker compose up -d db backend frontend
+cd frontend
 $env:PW_BASE_URL="http://localhost:5173"
 npx playwright test --ui
 ```
