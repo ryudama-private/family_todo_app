@@ -1,30 +1,36 @@
 <template>
   <main class="page">
     <div class="panel">
-      <h1 class="title">ファミリーTODOアプリ</h1>
+      <h1 class="title">家族登録</h1>
 
-      <form class="login-form" @submit.prevent>
+      <form class="add-form" @submit.prevent>
         <div class="row">
           <label for="name">名前</label>
-          <input id="name" type="text" autocomplete="username" />
+          <input id="name" type="text" autocomplete="name" />
         </div>
 
         <div class="row">
           <label for="password">パスワード</label>
-          <input
-            id="password"
-            type="password"
-            autocomplete="current-password"
-          />
+          <input id="password" type="password" autocomplete="new-password" />
+        </div>
+
+        <div class="row">
+          <label for="secret-question">秘密の質問</label>
+          <input id="secret-question" type="text" />
+        </div>
+
+        <div class="row">
+          <label for="secret-answer">秘密の回答</label>
+          <input id="secret-answer" type="text" />
         </div>
 
         <div class="actions">
-          <button type="submit">ログイン</button>
+          <button type="submit">登録</button>
         </div>
       </form>
 
-      <nav class="links" aria-label="login-sub-actions">
-        <RouterLink to="/family/register">家族追加</RouterLink>
+      <nav class="links" aria-label="family-register-sub-actions">
+        <RouterLink to="/login">ログインページへ戻る</RouterLink>
       </nav>
     </div>
   </main>
@@ -55,14 +61,14 @@
   letter-spacing: 0.04em;
 }
 
-.login-form {
-  width: min(460px, 100%);
-  margin: 380px auto 0;
+.add-form {
+  width: min(580px, 100%);
+  margin: 220px auto 0;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 170px 1fr;
   align-items: center;
   margin-bottom: 20px;
   column-gap: 18px;
@@ -78,7 +84,7 @@ input {
   height: 54px;
   border: 1px solid #555;
   background: transparent;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   padding: 0 14px;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
 }
@@ -86,7 +92,7 @@ input {
 .actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
 button {
@@ -107,16 +113,13 @@ button:hover {
   position: absolute;
   right: 28px;
   bottom: 34px;
-  display: grid;
-  gap: 10px;
   text-align: right;
 }
 
 .links a {
   color: #2e2e2e;
   text-decoration: none;
-  font-size: 1.95rem;
-  line-height: 1.1;
+  font-size: 1.4rem;
 }
 
 .links a:hover {
