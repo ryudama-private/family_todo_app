@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const cleanupToken = process.env.PW_E2E_CLEANUP_TOKEN || "local-test-token";
+
 test.describe("Family register E2E", () => {
   test("家族登録画面で入力して登録できる", async ({ page, request }) => {
     let createdFamilyId;
@@ -21,8 +23,15 @@ test.describe("Family register E2E", () => {
       await expect(page.locator(".message")).toContainText("登録しました:");
     } finally {
       if (createdFamilyId) {
+        expect(cleanupToken).toBeTruthy();
+
         const cleanupResponse = await request.delete(
           `/auth/register/${createdFamilyId}/`,
+          {
+            headers: {
+              "X-E2E-Cleanup-Token": cleanupToken,
+            },
+          },
         );
         expect(cleanupResponse.ok()).toBeTruthy();
       }

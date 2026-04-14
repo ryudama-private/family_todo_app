@@ -143,6 +143,17 @@ Playwright で家族登録画面の総合テストを実行できます。
 
 現在の E2E は、登録成功後に作成した family レコードの id を使って cleanup を行うため、テストが追加したデータだけを終了時に自動削除します。
 
+cleanup API は次のガードが有効です。
+
+- 開発環境（DEBUG=True）であること
+- 環境変数 `E2E_CLEANUP_ENABLED=true` で明示的に有効化されていること
+- リクエストヘッダ `X-E2E-Cleanup-Token` が `E2E_CLEANUP_TOKEN` と一致すること
+
+このリポジトリではルートの `.env` に以下を固定しているため、通常は毎回設定不要です。
+
+- `E2E_CLEANUP_ENABLED=true`
+- `E2E_CLEANUP_TOKEN=local-test-token`
+
 Docker Compose で実行（推奨）:
 
 ```bash

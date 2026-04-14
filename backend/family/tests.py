@@ -121,6 +121,8 @@ def test_register_secret_answer_is_hashed(client):
 @pytest.mark.django_db
 def test_delete_family_for_e2e_deletes_only_target_record(client, settings):
     settings.DEBUG = True
+    settings.E2E_CLEANUP_ENABLED = True
+    settings.E2E_CLEANUP_TOKEN = "test-cleanup-token"
     target = Family.objects.create(
         name="e2e-target",
         password="hashed-password",
@@ -134,7 +136,10 @@ def test_delete_family_for_e2e_deletes_only_target_record(client, settings):
         secret_answer="hashed-answer",
     )
 
-    response = client.delete(f"/auth/register/{target.id}/")
+    response = client.delete(
+        f"/auth/register/{target.id}/",
+        HTTP_X_E2E_CLEANUP_TOKEN="test-cleanup-token",
+    )
 
     assert response.status_code == 200
     assert response.json() == {"deleted_id": target.id}
@@ -145,6 +150,8 @@ def test_delete_family_for_e2e_deletes_only_target_record(client, settings):
 @pytest.mark.django_db
 def test_delete_family_for_e2e_is_forbidden_when_debug_disabled(client, settings):
     settings.DEBUG = False
+    settings.E2E_CLEANUP_ENABLED = True
+    settings.E2E_CLEANUP_TOKEN = "test-cleanup-token"
     family = Family.objects.create(
         name="e2e-target",
         password="hashed-password",
@@ -152,8 +159,55 @@ def test_delete_family_for_e2e_is_forbidden_when_debug_disabled(client, settings
         secret_answer="hashed-answer",
     )
 
-    response = client.delete(f"/auth/register/{family.id}/")
+    response = client.delete(
+        f"/auth/register/{family.id}/",
+        HTTP_X_E2E_CLEANUP_TOKEN="test-cleanup-token",
+    )
 
     assert response.status_code == 403
     assert response.json() == {"error": "この機能は開発環境でのみ利用できます。"}
+    assert Family.objects.filter(id=family.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_family_for_e2e_is_forbidden_when_cleanup_disabled(client, settings):
+    settings.DEBUG = True
+    settings.E2E_CLEANUP_ENABLED = False
+    settings.E2E_CLEANUP_TOKEN = "test-cleanup-token"
+    family = Family.objects.create(
+        name="e2e-target",
+        password="hashed-password",
+        secret_question="好きな色は？",
+        secret_answer="hashed-answer",
+    )
+
+    response = client.delete(
+        f"/auth/register/{family.id}/",
+        HTTP_X_E2E_CLEANUP_TOKEN="test-cleanup-token",
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"error": "cleanup機能が無効です。"}
+    assert Family.objects.filter(id=family.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_family_for_e2e_is_forbidden_when_token_is_invalid(client, settings):
+    settings.DEBUG = True
+    settings.E2E_CLEANUP_ENABLED = True
+    settings.E2E_CLEANUP_TOKEN = "correct-token"
+    family = Family.objects.create(
+        name="e2e-target",
+        password="hashed-password",
+        secret_question="好きな色は？",
+        secret_answer="hashed-answer",
+    )
+
+    response = client.delete(
+        f"/auth/register/{family.id}/",
+        HTTP_X_E2E_CLEANUP_TOKEN="wrong-token",
+    )
+
+    assert response.status_code == 403
+    assert response.json() == {"error": "cleanupトークンが不正です。"}
     assert Family.objects.filter(id=family.id).exists()

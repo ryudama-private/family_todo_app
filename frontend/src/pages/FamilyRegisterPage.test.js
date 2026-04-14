@@ -1,5 +1,8 @@
 import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 import FamilyRegisterPage from "./FamilyRegisterPage.vue";
+
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const RouterLinkStub = {
   props: ["to"],
@@ -53,6 +56,8 @@ describe("FamilyRegisterPage", () => {
     expect(wrapper.get("#secret-answer").element.value).toBe("カレー");
 
     await wrapper.get("form").trigger("submit");
+    await flushPromises();
+    await nextTick();
 
     expect(globalThis.fetch).toHaveBeenCalledWith("/auth/register/", {
       method: "POST",
@@ -68,5 +73,40 @@ describe("FamilyRegisterPage", () => {
     });
 
     expect(wrapper.get(".message").text()).toBe("登録しました: テスト太郎");
+  });
+
+  it("登録失敗時にerrorsの内容を表示してエラースタイルになる", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        errors: {
+          name: "必須項目です。",
+          password: "必須項目です。",
+        },
+      }),
+    });
+
+    await wrapper.get("form").trigger("submit");
+    await flushPromises();
+    await nextTick();
+
+    const message = wrapper.get(".message");
+    expect(message.text()).toContain("name: 必須項目です。");
+    expect(message.text()).toContain("password: 必須項目です。");
+    expect(message.classes()).toContain("error");
+  });
+
+  it("通信例外時に汎用エラーメッセージを表示してエラースタイルになる", async () => {
+    globalThis.fetch = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network error"));
+
+    await wrapper.get("form").trigger("submit");
+    await flushPromises();
+    await nextTick();
+
+    const message = wrapper.get(".message");
+    expect(message.text()).toBe("予期せぬエラーが発生しました。");
+    expect(message.classes()).toContain("error");
   });
 });
