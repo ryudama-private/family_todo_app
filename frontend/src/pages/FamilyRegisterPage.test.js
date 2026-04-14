@@ -8,8 +8,15 @@ const RouterLinkStub = {
 
 describe("FamilyRegisterPage", () => {
   let wrapper;
+  let originalFetch;
 
   beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ name: "テスト太郎" }),
+    });
+
     wrapper = mount(FamilyRegisterPage, {
       global: {
         stubs: {
@@ -17,6 +24,10 @@ describe("FamilyRegisterPage", () => {
         },
       },
     });
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
   });
 
   it("家族登録フォームのタイトル、全項目、登録ボタンを表示する", () => {
@@ -28,7 +39,7 @@ describe("FamilyRegisterPage", () => {
     expect(wrapper.get("button[type='submit']").text()).toBe("登録");
   });
 
-  it("全項目を入力して登録ボタンを押せる", async () => {
+  it("全項目を入力して登録ボタンを押して、登録が成功する", async () => {
     await wrapper.get("#name").setValue("テスト太郎");
     await wrapper.get("#password").setValue("password123");
     await wrapper.get("#secret-question").setValue("好きな食べ物は？");
@@ -41,6 +52,21 @@ describe("FamilyRegisterPage", () => {
     );
     expect(wrapper.get("#secret-answer").element.value).toBe("カレー");
 
-    await wrapper.get("button[type='submit']").trigger("click");
+    await wrapper.get("form").trigger("submit");
+
+    expect(globalThis.fetch).toHaveBeenCalledWith("/auth/register/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: "テスト太郎",
+        password: "password123",
+        secret_question: "好きな食べ物は？",
+        secret_answer: "カレー",
+      }),
+    });
+
+    expect(wrapper.get(".message").text()).toBe("登録しました: テスト太郎");
   });
 });

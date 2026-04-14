@@ -3,30 +3,50 @@
     <div class="panel">
       <h1 class="title">家族登録</h1>
 
-      <form class="add-form" @submit.prevent>
+      <form class="add-form" @submit.prevent="onSubmit">
         <div class="row">
           <label for="name">名前</label>
-          <input id="name" type="text" autocomplete="name" />
+          <input
+            id="name"
+            v-model="form.name"
+            type="text"
+            autocomplete="name"
+          />
         </div>
 
         <div class="row">
           <label for="password">パスワード</label>
-          <input id="password" type="password" autocomplete="new-password" />
+          <input
+            id="password"
+            v-model="form.password"
+            type="password"
+            autocomplete="new-password"
+          />
         </div>
 
         <div class="row">
           <label for="secret-question">秘密の質問</label>
-          <input id="secret-question" type="text" />
+          <input
+            id="secret-question"
+            v-model="form.secretQuestion"
+            type="text"
+          />
         </div>
 
         <div class="row">
           <label for="secret-answer">秘密の回答</label>
-          <input id="secret-answer" type="text" />
+          <input id="secret-answer" v-model="form.secretAnswer" type="text" />
         </div>
 
         <div class="actions">
-          <button type="submit">登録</button>
+          <button type="submit" :disabled="isSubmitting">
+            {{ isSubmitting ? "送信中..." : "登録" }}
+          </button>
         </div>
+
+        <p v-if="message" class="message" :class="{ error: isError }">
+          {{ message }}
+        </p>
       </form>
 
       <nav class="links" aria-label="family-register-sub-actions">
@@ -35,6 +55,71 @@
     </div>
   </main>
 </template>
+
+<script setup>
+import { reactive, ref } from "vue";
+
+const form = reactive({
+  name: "",
+  password: "",
+  secretQuestion: "",
+  secretAnswer: "",
+});
+
+const isSubmitting = ref(false);
+const message = ref("");
+const isError = ref(false);
+
+const resetForm = () => {
+  form.name = "";
+  form.password = "";
+  form.secretQuestion = "";
+  form.secretAnswer = "";
+};
+
+const onSubmit = async () => {
+  message.value = "";
+  isError.value = false;
+  isSubmitting.value = true;
+
+  try {
+    const response = await fetch("/auth/register/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: form.name,
+        password: form.password,
+        secret_question: form.secretQuestion,
+        secret_answer: form.secretAnswer,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (data?.errors) {
+        message.value = Object.entries(data.errors)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(" / ");
+      } else {
+        message.value = data?.error || "登録に失敗しました。";
+      }
+      isError.value = true;
+      return;
+    }
+
+    message.value = `登録しました: ${data.name}`;
+    resetForm();
+  } catch {
+    message.value = "予期せぬエラーが発生しました。";
+    isError.value = true;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+</script>
 
 <style scoped>
 .page {
@@ -95,6 +180,17 @@ input {
   margin-top: 24px;
 }
 
+.message {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  color: #1f7a1f;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+.message.error {
+  color: #b42318;
+}
+
 button {
   border: 1px solid #555;
   background: #e4e4e4;
@@ -107,6 +203,11 @@ button {
 
 button:hover {
   background: #dadada;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .links {
