@@ -23,6 +23,8 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 - frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
 - frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
+- frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
+- frontend/playwright.config.js: Playwright設定
 
 ## 起動方法
 
@@ -135,9 +137,46 @@ docker compose exec frontend sh -c "npm run test"
 docker compose exec frontend sh -c "npm run test:watch"
 ```
 
+### E2Eテスト
+
+Playwright で家族登録画面の総合テストを実行できます。
+
+Docker Compose で実行（推奨）:
+
+```bash
+docker compose up -d db backend frontend
+docker compose run --rm e2e
+```
+
+ローカルのブラウザを開いて実行:
+
+```bash
+docker compose up -d db backend frontend
+cd frontend
+npm install
+npx playwright install chromium
+PW_BASE_URL=http://localhost:5173 npx playwright test --headed
+```
+
+UIモードでテストを選択して実行:
+
+```bash
+docker compose up -d db backend frontend
+cd frontend
+PW_BASE_URL=http://localhost:5173 npx playwright test --ui
+```
+
+Windows PowerShell では環境変数を次のように設定します。
+
+```powershell
+$env:PW_BASE_URL="http://localhost:5173"
+npx playwright test --ui
+```
+
 ### 現在のテスト対象
 
 - LoginPageのタイトル、入力欄、ログインボタン、家族追加リンク
 - FamilyRegisterPageのタイトル、入力欄、登録ボタン
 - 各フォームへの入力と送信ボタン押下
 - ルーターの画面遷移設定と / から /login へのリダイレクト
+- 家族登録画面で入力して登録完了メッセージが表示されるE2E
