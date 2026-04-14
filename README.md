@@ -15,6 +15,15 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 - frontend: Vueアプリ
 - docker-compose.yml: 開発用コンテナ定義
 
+### フロントエンドの主な構成
+
+- frontend/src/pages/LoginPage.vue: ログイン画面
+- frontend/src/pages/FamilyRegisterPage.vue: 家族登録画面
+- frontend/src/router/index.js: 画面ルーティング
+- frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
+- frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
+- frontend/src/router/index.test.js: ルーター設定のVitest
+
 ## 起動方法
 
 1. Docker Desktop を起動する
@@ -28,6 +37,12 @@ docker compose up --build
 
 - Backend health check: http://localhost:8000/health/
 - Frontend: http://localhost:5173/
+
+## 画面構成
+
+- /login: ログイン画面
+- /family/register: 家族登録画面
+- /: /login にリダイレクト
 
 ## PostgreSQL 接続情報
 
@@ -45,11 +60,11 @@ docker compose down
 
 ## API エンドポイント
 
-| Method | Path           | 説明                     |
-| ------ | -------------- | ------------------------ |
-| POST   | /auth/register | 家族アカウントの新規登録 |
+| Method | Path            | 説明                     |
+| ------ | --------------- | ------------------------ |
+| POST   | /auth/register/ | 家族アカウントの新規登録 |
 
-### POST /auth/register
+### POST /auth/register/
 
 **Request Body (JSON)**
 
@@ -88,10 +103,12 @@ docker compose down
 
 ## テスト
 
+### Backendテスト
+
 コンテナ内で実行（推奨）
 
 ```bash
-docker compose exec backend pytest -v
+docker compose exec backend sh -c "pip install -r requirements-dev.txt && pytest -v"
 ```
 
 ローカルで実行（Docker起動中に限る）
@@ -101,3 +118,26 @@ cd backend
 .\.venv\Scripts\Activate.ps1
 $env:POSTGRES_HOST="localhost"; pytest -v
 ```
+
+### Frontendテスト
+
+Vitestで画面コンポーネントとルーターをテストできます。
+
+一括実行:
+
+```bash
+docker compose exec frontend sh -c "npm run test"
+```
+
+ウォッチモード:
+
+```bash
+docker compose exec frontend sh -c "npm run test:watch"
+```
+
+### 現在のテスト対象
+
+- LoginPageのタイトル、入力欄、ログインボタン、家族追加リンク
+- FamilyRegisterPageのタイトル、入力欄、登録ボタン
+- 各フォームへの入力と送信ボタン押下
+- ルーターの画面遷移設定と / から /login へのリダイレクト
