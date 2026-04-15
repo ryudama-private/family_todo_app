@@ -2,7 +2,7 @@ import json
 
 from django.conf import settings
 from django.utils.crypto import constant_time_compare
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password, make_password
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -59,6 +59,52 @@ def register(request):
             "updated_at": family.updated_at.isoformat(),
         },
         status=201,
+    )
+
+
+@csrf_exempt
+@require_POST
+def login(request):
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "リクエストボディが不正です。"}, status=400)
+
+    if not isinstance(body, dict):
+        return JsonResponse({"error": "JSONオブジェクトを指定してください。"}, status=400)
+
+    fields = {
+        "name": body.get("name"),
+        "password": body.get("password"),
+    }
+
+    errors = {}
+    for field, value in fields.items():
+        if not isinstance(value, str):
+            errors[field] = "文字列で指定してください。"
+        elif not value.strip():
+            errors[field] = "必須項目です。"
+
+    if errors:
+        return JsonResponse({"errors": errors}, status=400)
+
+    name = fields["name"].strip()
+    password = fields["password"].strip()
+
+    try:
+        family = Family.objects.get(name=name)
+    except Family.DoesNotExist:
+        return JsonResponse({"error": "名前またはパスワードが違います。"}, status=401)
+
+    if not check_password(password, family.password):
+        return JsonResponse({"error": "名前またはパスワードが違います。"}, status=401)
+
+    return JsonResponse(
+        {
+            "id": family.id,
+            "name": family.name,
+        },
+        status=200,
     )
 
 
