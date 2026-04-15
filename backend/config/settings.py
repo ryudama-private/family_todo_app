@@ -80,3 +80,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+E2E_CLEANUP_ENABLED = os.getenv("E2E_CLEANUP_ENABLED", "false").lower() == "true"
+E2E_CLEANUP_TOKEN = os.getenv("E2E_CLEANUP_TOKEN", "")

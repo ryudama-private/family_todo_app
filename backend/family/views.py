@@ -1,9 +1,12 @@
 import json
 
+from django.conf import settings
+from django.utils.crypto import constant_time_compare
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 
 from .models import Family
 
@@ -57,3 +60,25 @@ def register(request):
         },
         status=201,
     )
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_family_for_e2e(request, family_id):
+    if not settings.DEBUG:
+        return JsonResponse({"error": "この機能は開発環境でのみ利用できます。"}, status=403)
+
+    if not getattr(settings, "E2E_CLEANUP_ENABLED", False):
+        return JsonResponse({"error": "cleanup機能が無効です。"}, status=403)
+
+    expected_token = getattr(settings, "E2E_CLEANUP_TOKEN", "")
+    if not expected_token:
+        return JsonResponse({"error": "cleanupトークンが未設定です。"}, status=503)
+
+    provided_token = request.headers.get("X-E2E-Cleanup-Token", "")
+    if not constant_time_compare(provided_token, expected_token):
+        return JsonResponse({"error": "cleanupトークンが不正です。"}, status=403)
+
+    family = get_object_or_404(Family, id=family_id)
+    family.delete()
+    return JsonResponse({"deleted_id": family_id}, status=200)
