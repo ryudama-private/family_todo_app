@@ -11,23 +11,20 @@ from django.views.decorators.http import require_POST, require_http_methods
 from .models import Family
 
 
-@csrf_exempt
-@require_POST
-def register(request):
+def _parse_json_body(request):
     try:
         body = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({"error": "リクエストボディが不正です。"}, status=400)
-    
+        return None, JsonResponse({"error": "リクエストボディが不正です。"}, status=400)
+
     if not isinstance(body, dict):
-        return JsonResponse({"error": "JSONオブジェクトを指定してください。"}, status=400)
-    
-    fields = {
-        "name": body.get("name"),
-        "password": body.get("password"),
-        "secret_question": body.get("secret_question"),
-        "secret_answer": body.get("secret_answer"),
-    }
+        return None, JsonResponse({"error": "JSONオブジェクトを指定してください。"}, status=400)
+
+    return body, None
+
+
+def _validate_and_strip_fields(body, field_names):
+    fields = {field_name: body.get(field_name) for field_name in field_names}
 
     errors = {}
     for field, value in fields.items():
@@ -37,12 +34,30 @@ def register(request):
             errors[field] = "必須項目です。"
 
     if errors:
-        return JsonResponse({"errors": errors}, status=400)
+        return None, JsonResponse({"errors": errors}, status=400)
 
-    name = fields["name"].strip()
-    password = fields["password"].strip()
-    secret_question = fields["secret_question"].strip()
-    secret_answer = fields["secret_answer"].strip()
+    normalized_fields = {field: value.strip() for field, value in fields.items()}
+    return normalized_fields, None
+
+
+@csrf_exempt
+@require_POST
+def register(request):
+    body, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
+
+    fields, error_response = _validate_and_strip_fields(
+        body,
+        ["name", "password", "secret_question", "secret_answer"],
+    )
+    if error_response:
+        return error_response
+
+    name = fields["name"]
+    password = fields["password"]
+    secret_question = fields["secret_question"]
+    secret_answer = fields["secret_answer"]
 
     family = Family.objects.create(
         name=name,
@@ -65,31 +80,16 @@ def register(request):
 @csrf_exempt
 @require_POST
 def login(request):
-    try:
-        body = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "リクエストボディが不正です。"}, status=400)
+    body, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
 
-    if not isinstance(body, dict):
-        return JsonResponse({"error": "JSONオブジェクトを指定してください。"}, status=400)
+    fields, error_response = _validate_and_strip_fields(body, ["name", "password"])
+    if error_response:
+        return error_response
 
-    fields = {
-        "name": body.get("name"),
-        "password": body.get("password"),
-    }
-
-    errors = {}
-    for field, value in fields.items():
-        if not isinstance(value, str):
-            errors[field] = "文字列で指定してください。"
-        elif not value.strip():
-            errors[field] = "必須項目です。"
-
-    if errors:
-        return JsonResponse({"errors": errors}, status=400)
-
-    name = fields["name"].strip()
-    password = fields["password"].strip()
+    name = fields["name"]
+    password = fields["password"]
 
     try:
         family = Family.objects.get(name=name)
