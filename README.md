@@ -65,6 +65,7 @@ docker compose down
 | Method | Path            | 説明                     |
 | ------ | --------------- | ------------------------ |
 | POST   | /auth/register/ | 家族アカウントの新規登録 |
+| POST   | /auth/login/    | ログイン                 |
 
 ### POST /auth/register/
 
@@ -99,6 +100,45 @@ docker compose down
     "password": "必須項目です。",
     "secret_question": "必須項目です。",
     "secret_answer": "必須項目です。"
+  }
+}
+```
+
+### POST /auth/login/
+
+**Request Body (JSON)**
+
+```json
+{
+  "name": "お母さん",
+  "password": "パスワード"
+}
+```
+
+**Response 200**
+
+```json
+{
+  "id": 1,
+  "name": "お母さん"
+}
+```
+
+**Response 401（認証失敗）**
+
+```json
+{
+  "error": "名前またはパスワードが違います。"
+}
+```
+
+**Response 400（必須項目不足）**
+
+```json
+{
+  "errors": {
+    "name": "必須項目です。",
+    "password": "必須項目です。"
   }
 }
 ```
