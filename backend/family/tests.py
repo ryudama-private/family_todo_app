@@ -119,6 +119,38 @@ def test_register_secret_answer_is_hashed(client):
 
 
 @pytest.mark.django_db
+def test_register_returns_400_when_name_is_duplicate(client):
+    client.post(
+        "/auth/register/",
+        data=json.dumps(
+            {
+                "name": "お母さん",
+                "password": "TestPass123!",
+                "secret_question": "好きな食べ物は？",
+                "secret_answer": "カレー",
+            }
+        ),
+        content_type="application/json",
+    )
+
+    response = client.post(
+        "/auth/register/",
+        data=json.dumps(
+            {
+                "name": "お母さん",
+                "password": "AnotherPass123!",
+                "secret_question": "好きな色は？",
+                "secret_answer": "青",
+            }
+        ),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"errors": {"name": "この名前はすでに使われています。"}}
+
+
+@pytest.mark.django_db
 def test_login_success(client):
     family = Family.objects.create(
         name="お母さん",
@@ -211,6 +243,32 @@ def test_login_validation_error_when_required_fields_missing(client):
     assert "errors" in payload
     assert payload["errors"]["name"] == "必須項目です。"
     assert payload["errors"]["password"] == "必須項目です。"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "request_body, expected_missing_keys",
+    [
+        ({}, ["name", "password"]),
+        ({"name": "お母さん"}, ["password"]),
+    ],
+)
+def test_login_returns_400_when_required_keys_are_missing(
+    client,
+    request_body,
+    expected_missing_keys,
+):
+    response = client.post(
+        "/auth/login/",
+        data=json.dumps(request_body),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert "errors" in payload
+    for key in expected_missing_keys:
+        assert key in payload["errors"]
 
 
 @pytest.mark.django_db

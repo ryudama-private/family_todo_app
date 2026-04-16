@@ -3,6 +3,7 @@ import json
 from django.conf import settings
 from django.utils.crypto import constant_time_compare
 from django.contrib.auth.hashers import check_password, make_password
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -24,19 +25,19 @@ def _parse_json_body(request):
 
 
 def _validate_and_strip_fields(body, field_names):
-    fields = {field_name: body.get(field_name) for field_name in field_names}
-
     errors = {}
-    for field, value in fields.items():
-        if not isinstance(value, str):
+    for field in field_names:
+        if field not in body:
+            errors[field] = "必須項目です。"
+        elif not isinstance(body[field], str):
             errors[field] = "文字列で指定してください。"
-        elif not value.strip():
+        elif not body[field].strip():
             errors[field] = "必須項目です。"
 
     if errors:
         return None, JsonResponse({"errors": errors}, status=400)
 
-    normalized_fields = {field: value.strip() for field, value in fields.items()}
+    normalized_fields = {field: body[field].strip() for field in field_names}
     return normalized_fields, None
 
 
@@ -59,12 +60,15 @@ def register(request):
     secret_question = fields["secret_question"]
     secret_answer = fields["secret_answer"]
 
-    family = Family.objects.create(
-        name=name,
-        password=make_password(password),
-        secret_question=secret_question,
-        secret_answer=make_password(secret_answer),
-    )
+    try:
+        family = Family.objects.create(
+            name=name,
+            password=make_password(password),
+            secret_question=secret_question,
+            secret_answer=make_password(secret_answer),
+        )
+    except IntegrityError:
+        return JsonResponse({"errors": {"name": "この名前はすでに使われています。"}}, status=400)
 
     return JsonResponse(
         {
