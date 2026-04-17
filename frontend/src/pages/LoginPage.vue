@@ -3,24 +3,36 @@
     <div class="panel">
       <h1 class="title">ファミリーTODOアプリ</h1>
 
-      <form class="login-form" @submit.prevent>
+      <form class="login-form" @submit.prevent="onSubmit">
         <div class="row">
           <label for="name">名前</label>
-          <input id="name" type="text" autocomplete="username" />
+          <input
+            id="name"
+            v-model="form.name"
+            type="text"
+            autocomplete="username"
+          />
         </div>
 
         <div class="row">
           <label for="password">パスワード</label>
           <input
             id="password"
+            v-model="form.password"
             type="password"
             autocomplete="current-password"
           />
         </div>
 
         <div class="actions">
-          <button type="submit">ログイン</button>
+          <button type="submit" :disabled="isSubmitting">
+            {{ isSubmitting ? "送信中..." : "ログイン" }}
+          </button>
         </div>
+
+        <p v-if="message" class="message" :class="{ error: isError }">
+          {{ message }}
+        </p>
       </form>
 
       <nav class="links" aria-label="login-sub-actions">
@@ -29,6 +41,63 @@
     </div>
   </main>
 </template>
+
+<script setup>
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const form = reactive({
+  name: "",
+  password: "",
+});
+
+const isSubmitting = ref(false);
+const message = ref("");
+const isError = ref(false);
+
+const onSubmit = async () => {
+  message.value = "";
+  isError.value = false;
+  isSubmitting.value = true;
+
+  try {
+    const response = await fetch("/auth/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: form.name,
+        password: form.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (data?.errors) {
+        message.value = Object.entries(data.errors)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(" / ");
+      } else {
+        message.value = data?.error || "ログインに失敗しました。";
+      }
+      isError.value = true;
+      return;
+    }
+
+    localStorage.setItem("loggedInFamilyName", data.name);
+    await router.push("/todo");
+  } catch {
+    message.value = "予期せぬエラーが発生しました。";
+    isError.value = true;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+</script>
 
 <style scoped>
 .page {
@@ -89,6 +158,16 @@ input {
   margin-top: 16px;
 }
 
+.message {
+  margin: 14px 0 0;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.message.error {
+  color: #b91c1c;
+}
+
 button {
   border: 1px solid #555;
   background: #e4e4e4;
@@ -101,6 +180,11 @@ button {
 
 button:hover {
   background: #dadada;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .links {

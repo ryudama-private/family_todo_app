@@ -26,6 +26,7 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 - frontend/src/pages/TodoPage.test.js: Todo画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
+- frontend/e2e/login.spec.js: ログイン画面のPlaywright E2E
 - frontend/playwright.config.js: Playwright設定
 
 ## 起動方法
@@ -188,7 +189,7 @@ docker compose exec frontend sh -c "npm run test:watch"
 
 ### E2Eテスト
 
-Playwright で家族登録画面の総合テストを実行できます。
+Playwright で家族登録画面とログイン画面の総合テストを実行できます。
 
 現在の E2E は、登録成功後に作成した family レコードの id を使って cleanup を行うため、テストが追加したデータだけを終了時に自動削除します。
 
@@ -246,3 +247,6 @@ npx playwright test --ui
 - 各フォームへの入力と送信ボタン押下
 - ルーターの画面遷移設定（/login, /todo, /family/register）と / から /login へのリダイレクト
 - 家族登録画面で入力して登録完了メッセージが表示されるE2E
+- 正しい認証情報でログイン後に /todo へ遷移するE2E
+- 誤ったパスワードでログイン失敗メッセージが表示されるE2E
+- ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
