@@ -24,7 +24,7 @@
 import { ref } from "vue";
 
 const loggedInName = ref(
-  localStorage.getItem("loggedInFamilyName") || "ログインしてる人",
+  localStorage.getItem("loggedInFamilyName") || "ログインしている人",
 );
 </script>
 

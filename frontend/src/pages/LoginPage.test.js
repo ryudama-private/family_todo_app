@@ -1,4 +1,5 @@
 import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 import LoginPage from "./LoginPage.vue";
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -69,6 +70,7 @@ describe("LoginPage", () => {
 
     await wrapper.get("form").trigger("submit");
     await flushPromises();
+    await nextTick();
 
     expect(globalThis.fetch).toHaveBeenCalledWith("/auth/login/", {
       method: "POST",
@@ -94,6 +96,7 @@ describe("LoginPage", () => {
 
     await wrapper.get("form").trigger("submit");
     await flushPromises();
+    await nextTick();
 
     expect(wrapper.get(".message").text()).toBe(
       "名前またはパスワードが違います。",

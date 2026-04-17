@@ -13,7 +13,9 @@ describe("TodoPage", () => {
   it("ログインユーザー名が未保存のときはデフォルト文言を表示する", () => {
     const wrapper = mount(TodoPage);
 
-    expect(wrapper.get(".logged-in-user").text()).toContain("ログインしてる人");
+    expect(wrapper.get(".logged-in-user").text()).toContain(
+      "ログインしている人",
+    );
   });
 
   it("ログインユーザー名が保存されているときはその名前を表示する", () => {
