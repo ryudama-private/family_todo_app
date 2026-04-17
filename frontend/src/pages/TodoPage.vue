@@ -2,9 +2,10 @@
   <main class="page">
     <section class="frame" aria-label="todo-layout">
       <aside class="side" aria-label="todo-navigation">
-        <p class="logged-in-user">
-          <span class="line">ログインしてる人</span>
-        </p>
+        <div class="logged-in-user">
+          <div>ログインしている人</div>
+          <span class="line">{{ loggedInName }}</span>
+        </div>
 
         <nav class="menu" aria-label="todo-menu">
           <button type="button" class="nav">TODO 一覧</button>
@@ -18,6 +19,14 @@
     </section>
   </main>
 </template>
+
+<script setup>
+import { ref } from "vue";
+
+const loggedInName = ref(
+  localStorage.getItem("loggedInFamilyName") || "ログインしてる人",
+);
+</script>
 
 <style scoped>
 .page {
