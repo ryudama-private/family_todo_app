@@ -6,7 +6,6 @@ describe("router", () => {
 
     expect(paths).toContain("/");
     expect(paths).toContain("/login");
-    expect(paths).toContain("/todo");
     expect(paths).toContain("/family/register");
   });
 
@@ -15,5 +14,11 @@ describe("router", () => {
 
     expect(rootRoute).toBeDefined();
     expect(rootRoute.redirect).toBe("/login");
+  });
+
+  it("Todoページへのルートを持つ", () => {
+    const paths = router.getRoutes().map((route) => route.path);
+
+    expect(paths).toContain("/todo");
   });
 });

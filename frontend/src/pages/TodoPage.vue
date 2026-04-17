@@ -2,19 +2,19 @@
   <main class="page">
     <section class="frame" aria-label="todo-layout">
       <aside class="side" aria-label="todo-navigation">
-        <p class="logined-user">
+        <p class="logged-in-user">
           <span class="line">ログインしてる人</span>
         </p>
 
         <nav class="menu" aria-label="todo-menu">
-          <span class="nav">TODO 一覧</span>
-          <span class="nav">カレンダー</span>
+          <button type="button" class="nav">TODO 一覧</button>
+          <button type="button" class="nav">カレンダー</button>
         </nav>
 
         <button type="button" class="logout-btn">ログアウト</button>
       </aside>
 
-      <section class="content" aria-label="todo-content" />
+      <section class="content" aria-label="todo-content"></section>
     </section>
   </main>
 </template>
@@ -45,7 +45,7 @@
   gap: 16px;
 }
 
-.logined-user {
+.logged-in-user {
   margin: 0;
   padding: 10px 8px;
   font-size: 0.75rem;
@@ -63,8 +63,11 @@
   display: grid;
   place-items: center;
   height: 34px;
+  border: none;
+  background: transparent;
   font-size: 0.75rem;
   letter-spacing: 0.03em;
+  font-family: inherit;
   cursor: pointer;
 }
 
@@ -74,15 +77,12 @@
   height: 34px;
   font-size: 0.75rem;
   letter-spacing: 0.03em;
+  margin-top: auto;
+  cursor: pointer;
 }
 
 .nav:hover,
 .logout-btn:hover {
   background: #edf1ff;
-}
-
-.logout-btn {
-  margin-top: auto;
-  cursor: pointer;
 }
 </style>
