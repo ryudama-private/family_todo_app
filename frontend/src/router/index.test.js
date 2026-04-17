@@ -15,4 +15,10 @@ describe("router", () => {
     expect(rootRoute).toBeDefined();
     expect(rootRoute.redirect).toBe("/login");
   });
+
+  it("Todoページへのルートを持つ", () => {
+    const paths = router.getRoutes().map((route) => route.path);
+
+    expect(paths).toContain("/todo");
+  });
 });

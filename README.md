@@ -19,9 +19,11 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 
 - frontend/src/pages/LoginPage.vue: ログイン画面
 - frontend/src/pages/FamilyRegisterPage.vue: 家族登録画面
+- frontend/src/pages/TodoPage.vue: Todoメイン画面
 - frontend/src/router/index.js: 画面ルーティング
 - frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
 - frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
+- frontend/src/pages/TodoPage.test.js: Todo画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
 - frontend/playwright.config.js: Playwright設定
@@ -43,8 +45,15 @@ docker compose up --build
 ## 画面構成
 
 - /login: ログイン画面
+- /todo: Todoメイン画面
 - /family/register: 家族登録画面
 - /: /login にリダイレクト
+
+### Todo画面のレイアウト
+
+- 左サイドバー: ログイン中ユーザー表示、TODO一覧、カレンダー、ログアウト
+- 右コンテンツ領域: 今後Todo一覧やカレンダー本体を表示する領域
+- レイアウト方式: `grid-template-columns: 170px 1fr` による2カラム構成
 
 ## PostgreSQL 接続情報
 
@@ -233,6 +242,7 @@ npx playwright test --ui
 
 - LoginPageのタイトル、入力欄、ログインボタン、家族追加リンク
 - FamilyRegisterPageのタイトル、入力欄、登録ボタン
+- TodoPageのサイドバー表示、メニュー表示、ログアウトボタン表示
 - 各フォームへの入力と送信ボタン押下
-- ルーターの画面遷移設定と / から /login へのリダイレクト
+- ルーターの画面遷移設定（/login, /todo, /family/register）と / から /login へのリダイレクト
 - 家族登録画面で入力して登録完了メッセージが表示されるE2E
