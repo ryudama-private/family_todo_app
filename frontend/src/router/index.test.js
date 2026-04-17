@@ -6,6 +6,7 @@ describe("router", () => {
 
     expect(paths).toContain("/");
     expect(paths).toContain("/login");
+    expect(paths).toContain("/todo");
     expect(paths).toContain("/family/register");
   });
 
