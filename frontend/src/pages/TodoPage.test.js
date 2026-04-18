@@ -1,9 +1,22 @@
 import { mount } from "@vue/test-utils";
 import TodoPage from "./TodoPage.vue";
 
+const pushMock = vi.fn();
+
+vi.mock("vue-router", async () => {
+  const actual = await vi.importActual("vue-router");
+  return {
+    ...actual,
+    useRouter: () => ({
+      push: pushMock,
+    }),
+  };
+});
+
 describe("TodoPage", () => {
   beforeEach(() => {
     localStorage.clear();
+    pushMock.mockReset();
   });
 
   afterEach(() => {
@@ -33,5 +46,15 @@ describe("TodoPage", () => {
     expect(navItems).toContain("TODO 一覧");
     expect(navItems).toContain("カレンダー");
     expect(wrapper.get(".logout-btn").text()).toBe("ログアウト");
+  });
+
+  it("ログアウト押下で保存済みユーザー名を削除し /login に遷移する", async () => {
+    localStorage.setItem("loggedInFamilyName", "お母さん");
+    const wrapper = mount(TodoPage);
+
+    await wrapper.get(".logout-btn").trigger("click");
+
+    expect(localStorage.getItem("loggedInFamilyName")).toBeNull();
+    expect(pushMock).toHaveBeenCalledWith("/login");
   });
 });

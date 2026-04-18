@@ -12,7 +12,9 @@
           <button type="button" class="nav">カレンダー</button>
         </nav>
 
-        <button type="button" class="logout-btn">ログアウト</button>
+        <button type="button" class="logout-btn" @click="onLogout">
+          ログアウト
+        </button>
       </aside>
 
       <section class="content" aria-label="todo-content"></section>
@@ -22,10 +24,18 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const loggedInName = ref(
   localStorage.getItem("loggedInFamilyName") || "ログインしている人",
 );
+
+const onLogout = async () => {
+  localStorage.removeItem("loggedInFamilyName");
+  await router.push("/login");
+};
 </script>
 
 <style scoped>

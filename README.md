@@ -56,6 +56,12 @@ docker compose up --build
 - 右コンテンツ領域: 今後Todo一覧やカレンダー本体を表示する領域
 - レイアウト方式: `grid-template-columns: 170px 1fr` による2カラム構成
 
+### 現在のログアウト仕様
+
+- サーバーセッションやトークンは未使用
+- ログイン成功時に `localStorage` へ `loggedInFamilyName` を保存
+- ログアウト時に `loggedInFamilyName` を削除し `/login` へ遷移
+
 ## PostgreSQL 接続情報
 
 - Host: localhost
@@ -250,3 +256,4 @@ npx playwright test --ui
 - 正しい認証情報でログイン後に /todo へ遷移するE2E
 - 誤ったパスワードでログイン失敗メッセージが表示されるE2E
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
+- Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E

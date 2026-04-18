@@ -82,6 +82,35 @@ test.describe("Login E2E", () => {
     }
   });
 
+  test("Todo 画面でログアウトすると /login に戻り保持していた name が削除される", async ({
+    page,
+    request,
+  }) => {
+    let createdFamilyId;
+
+    try {
+      const family = await createFamily(request, `${Date.now()}-logout`);
+      createdFamilyId = family.id;
+
+      await page.goto("/login");
+      await page.getByLabel("名前").fill(family.name);
+      await page.getByLabel("パスワード").fill(family.password);
+      await page.getByRole("button", { name: "ログイン" }).click();
+
+      await expect(page).toHaveURL(/\/todo$/);
+      await page.getByRole("button", { name: "ログアウト" }).click();
+
+      await expect(page).toHaveURL(/\/login$/);
+
+      const storedName = await page.evaluate(() =>
+        localStorage.getItem("loggedInFamilyName"),
+      );
+      expect(storedName).toBeNull();
+    } finally {
+      await cleanupFamily(request, createdFamilyId);
+    }
+  });
+
   test("誤ったパスワードではログインできずエラーメッセージが表示される", async ({
     page,
     request,
