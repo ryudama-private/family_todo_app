@@ -1,14 +1,14 @@
 import { mount } from "@vue/test-utils";
 import TodoPage from "./TodoPage.vue";
 
-const pushMock = vi.fn();
+const replaceMock = vi.fn();
 
 vi.mock("vue-router", async () => {
   const actual = await vi.importActual("vue-router");
   return {
     ...actual,
     useRouter: () => ({
-      push: pushMock,
+      replace: replaceMock,
     }),
   };
 });
@@ -16,7 +16,7 @@ vi.mock("vue-router", async () => {
 describe("TodoPage", () => {
   beforeEach(() => {
     localStorage.clear();
-    pushMock.mockReset();
+    replaceMock.mockReset();
   });
 
   afterEach(() => {
@@ -48,13 +48,13 @@ describe("TodoPage", () => {
     expect(wrapper.get(".logout-btn").text()).toBe("ログアウト");
   });
 
-  it("ログアウト押下で保存済みユーザー名を削除し /login に遷移する", async () => {
+  it("ログアウト押下で保存済みユーザー名を削除し /login に遷移する（履歴置換）", async () => {
     localStorage.setItem("loggedInFamilyName", "お母さん");
     const wrapper = mount(TodoPage);
 
     await wrapper.get(".logout-btn").trigger("click");
 
     expect(localStorage.getItem("loggedInFamilyName")).toBeNull();
-    expect(pushMock).toHaveBeenCalledWith("/login");
+    expect(replaceMock).toHaveBeenCalledWith("/login");
   });
 });

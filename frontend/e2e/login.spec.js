@@ -134,4 +134,39 @@ test.describe("Login E2E", () => {
       await cleanupFamily(request, createdFamilyId);
     }
   });
+
+  test("ログアウト後にブラウザの戻るボタンで /todo に戻れない（履歴置換により保護）", async ({
+    page,
+    request,
+  }) => {
+    let createdFamilyId;
+
+    try {
+      const family = await createFamily(
+        request,
+        `${Date.now()}-back-protection`,
+      );
+      createdFamilyId = family.id;
+
+      // ログイン
+      await page.goto("/login");
+      await page.getByLabel("名前").fill(family.name);
+      await page.getByLabel("パスワード").fill(family.password);
+      await page.getByRole("button", { name: "ログイン" }).click();
+
+      await expect(page).toHaveURL(/\/todo$/);
+
+      // ログアウト
+      await page.getByRole("button", { name: "ログアウト" }).click();
+      await expect(page).toHaveURL(/\/login$/);
+
+      // ブラウザの戻るボタンを押す
+      await page.goBack();
+
+      // /login に留まっていることを確認（/todo に戻らない）
+      await expect(page).toHaveURL(/\/login$/);
+    } finally {
+      await cleanupFamily(request, createdFamilyId);
+    }
+  });
 });

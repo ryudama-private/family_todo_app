@@ -34,7 +34,7 @@ const loggedInName = ref(
 
 const onLogout = async () => {
   localStorage.removeItem("loggedInFamilyName");
-  await router.push("/login");
+  await router.replace("/login");
 };
 </script>
 
