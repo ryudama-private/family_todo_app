@@ -1,3 +1,27 @@
+## Azure App Service でのポート設定について
+
+Azure App Service では外部公開ポートは 80 のみです。
+
+**frontend（Vite）は `80:5173` のように、コンテナの 5173 番ポートを 80 にマッピングして公開するのが推奨です。**
+
+backend（Django）は外部公開不要なら `8000` のままでOKです（frontend からのみアクセス）。
+
+docker-compose.prod.yml の例:
+
+```
+services:
+  frontend:
+    image: familytodocontainer.azurecr.io/frontend:latest
+    ports:
+      - "80:5173"
+  backend:
+    image: familytodocontainer.azurecr.io/backend:latest
+    ports:
+      - "8000:8000"
+```
+
+この設定をしておくことで、Azure App Service での公開時にポートの問題でハマることを防げます。
+
 # family_todo_app
 
 Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向けTodoアプリの開発用リポジトリです。
