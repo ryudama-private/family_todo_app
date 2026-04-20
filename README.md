@@ -86,6 +86,30 @@ docker compose up --build
 - ログイン成功時に `localStorage` へ `loggedInFamilyName` を保存
 - ログアウト時に `loggedInFamilyName` を削除し `/login` へ遷移
 
+## DBの中身を確認する方法
+
+### familyテーブルの中身を確認する
+
+```bash
+docker compose exec backend python manage.py dbshell
+```
+
+### テーブル一覧を確認する
+
+```sql
+\dt
+```
+
+または
+
+```sql
+SELECT tablename FROM pg_tables WHERE schemaname = 'public';
+```
+
+終了は `\q` です。
+
+---
+
 ## PostgreSQL 接続情報
 
 - Host: localhost
