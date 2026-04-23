@@ -7,4 +7,6 @@ RUN npm install
 
 COPY . .
 
+COPY .env.production .env
+
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
