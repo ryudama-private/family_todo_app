@@ -9,4 +9,7 @@ COPY . .
 
 COPY .env.production .env
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+RUN npm run build
+
+# 本番用previewサーバーで静的配信
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "5173"]
