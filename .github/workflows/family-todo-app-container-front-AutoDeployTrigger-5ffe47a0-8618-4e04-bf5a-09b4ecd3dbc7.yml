@@ -34,7 +34,7 @@ jobs:
         uses: azure/container-apps-deploy-action@v2
         with:
           appSourcePath: ./frontend
-          dockerfilePath: ./frontend/Dockerfile
+          dockerfilePath: Dockerfile
           registryUrl: familytodocontainer.azurecr.io
           registryUsername: ${{ secrets.FAMILYTODOAPPCONTAINERFRONT_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.FAMILYTODOAPPCONTAINERFRONT_REGISTRY_PASSWORD }}
