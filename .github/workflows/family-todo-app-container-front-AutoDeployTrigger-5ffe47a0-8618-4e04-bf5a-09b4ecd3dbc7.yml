@@ -4,19 +4,18 @@ name: Trigger auto deployment for family-todo-app-container-front
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ staging ]
+    branches: [staging]
     paths:
-    - '**'
-    - '.github/workflows/family-todo-app-container-front-AutoDeployTrigger-5ffe47a0-8618-4e04-bf5a-09b4ecd3dbc7.yml'
+      - "**"
+      - ".github/workflows/family-todo-app-container-front-AutoDeployTrigger-5ffe47a0-8618-4e04-bf5a-09b4ecd3dbc7.yml"
 
-  # Allow manual trigger 
-  workflow_dispatch:      
+  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       id-token: write #This is required for requesting the OIDC JWT Token
       contents: read #Required when GH token is used to authenticate with private repo
 
@@ -34,16 +33,11 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          _targetLabelKey_: _targetLabel_
+          appSourcePath: ./frontend
+          dockerfilePath: ./frontend/Dockerfile
           registryUrl: familytodocontainer.azurecr.io
           registryUsername: ${{ secrets.FAMILYTODOAPPCONTAINERFRONT_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.FAMILYTODOAPPCONTAINERFRONT_REGISTRY_PASSWORD }}
           containerAppName: family-todo-app-container-front
           resourceGroup: family_todo_app
           imageToBuild: familytodocontainer.azurecr.io/family-todo-app-container-front:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
