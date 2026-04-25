@@ -4,7 +4,7 @@ name: Trigger auto deployment for family-todo-app-container-back
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: [staging]
+    branches: [main]
     paths:
       - "**"
       - ".github/workflows/family-todo-app-container-back-AutoDeployTrigger-e12726f1-8559-407e-b160-cc9fce147579.yml"
