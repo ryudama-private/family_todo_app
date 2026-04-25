@@ -61,9 +61,9 @@ const onSubmit = async () => {
   message.value = "";
   isError.value = false;
   isSubmitting.value = true;
-
   try {
-    const response = await fetch("/auth/login/", {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const response = await fetch(`${baseUrl}/auth/login/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
