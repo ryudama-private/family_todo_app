@@ -72,16 +72,19 @@ describe("LoginPage", () => {
     await flushPromises();
     await nextTick();
 
-    expect(globalThis.fetch).toHaveBeenCalledWith("/auth/login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "http://localhost:8000/auth/login/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "テスト太郎",
+          password: "password123",
+        }),
       },
-      body: JSON.stringify({
-        name: "テスト太郎",
-        password: "password123",
-      }),
-    });
+    );
     expect(localStorage.getItem("loggedInFamilyName")).toBe("テスト太郎");
     expect(pushMock).toHaveBeenCalledWith("/todo");
   });
