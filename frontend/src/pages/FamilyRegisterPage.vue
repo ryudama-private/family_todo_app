@@ -83,7 +83,8 @@ const onSubmit = async () => {
   isSubmitting.value = true;
 
   try {
-    const response = await fetch("/auth/register/", {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const response = await fetch(`${baseUrl}/auth/register/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

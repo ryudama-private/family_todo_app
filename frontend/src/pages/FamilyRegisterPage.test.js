@@ -59,18 +59,21 @@ describe("FamilyRegisterPage", () => {
     await flushPromises();
     await nextTick();
 
-    expect(globalThis.fetch).toHaveBeenCalledWith("/auth/register/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "http://localhost:8000/auth/register/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "テスト太郎",
+          password: "password123",
+          secret_question: "好きな食べ物は？",
+          secret_answer: "カレー",
+        }),
       },
-      body: JSON.stringify({
-        name: "テスト太郎",
-        password: "password123",
-        secret_question: "好きな食べ物は？",
-        secret_answer: "カレー",
-      }),
-    });
+    );
 
     expect(wrapper.get(".message").text()).toBe("登録しました: テスト太郎");
   });

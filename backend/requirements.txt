@@ -1,2 +1,5 @@
+# CORS support
+django-cors-headers
 Django>=5.0,<6.0
 psycopg[binary]>=3.2,<4.0
+python-dotenv>=0.19,<1.0
