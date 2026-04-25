@@ -1,7 +1,8 @@
 <template>
   <main class="page">
     <div class="panel">
-      <h1 class="title">家族登録</h1>
+      <!-- <h1 class="title">家族登録</h1> -->
+      <h1 class="title">CICDテスト1回目</h1>
 
       <form class="add-form" @submit.prevent="onSubmit">
         <div class="row">
