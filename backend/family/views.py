@@ -68,7 +68,7 @@ def register(request):
             secret_answer=make_password(secret_answer),
         )
     except IntegrityError:
-        return JsonResponse({"errors": {"name": "この名前はすでに使われています。"}}, status=400)
+        return JsonResponse({"errors": {"name": "CICDテスト1回目"}}, status=400)
 
     return JsonResponse(
         {
