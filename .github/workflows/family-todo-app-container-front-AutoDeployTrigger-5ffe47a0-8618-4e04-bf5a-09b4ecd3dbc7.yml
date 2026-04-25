@@ -23,6 +23,9 @@ jobs:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
+      - name: Create .env.production
+        run: echo "${{ secrets.FRONTEND_ENV_PRODUCTION }}" > frontend/.env.production
+
       - name: Azure Login
         uses: azure/login@v2
         with:
