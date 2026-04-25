@@ -35,7 +35,7 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://family-todo-app-container.bravemeadow-4bab85be.japaneast.azurecontainerapps.io",
+    "https://family-todo-app-container-front.bravemeadow-4bab85be.japaneast.azurecontainerapps.io",
 ]
 
 ROOT_URLCONF = "config.urls"

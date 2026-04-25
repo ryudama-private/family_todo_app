@@ -11,8 +11,7 @@ export default defineConfig({
       "localhost",
       "127.0.0.1",
       "::1",
-      "family-todo-app-container.bravemeadow-4bab85b8.japaneast.azurecontainerapps.io",
-      "family-todo-app-container.bravemeadow-4bab85be.japaneast.azurecontainerapps.io",
+      "family-todo-app-container-front.bravemeadow-4bab85be.japaneast.azurecontainerapps.io",
     ],
     proxy: {
       "/auth": {
