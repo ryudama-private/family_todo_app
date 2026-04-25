@@ -1,3 +1,13 @@
+## 本番環境APIエンドポイント
+
+### 本番環境APIエンドポイントの扱い
+
+- フロントエンド（Vue/Vite）からバックエンド（Django）APIへのリクエストは、`import.meta.env.VITE_API_BASE_URL` でAPIのベースURLを切り替えています。
+- 本番環境では `.env.production` で `VITE_API_BASE_URL` を本番バックエンドのURLに設定してください。
+- 開発環境では `http://localhost:8000` などローカルAPIサーバーのURLを指定します。
+
+---
+
 ## Azure App Service でのポート設定について
 
 Azure App Service では外部公開ポートは 80 のみです。
@@ -265,33 +275,31 @@ docker compose up -d db backend frontend
 docker compose run --rm e2e
 ```
 
-ローカルのブラウザを開いて実行:
+ローカルのブラウザを開いてE2Eテストを実行:
 
-```bash
-docker compose up -d db backend frontend
-cd frontend
-npm install
-npx playwright install chromium
-PW_BASE_URL=http://localhost:5173 npx playwright test --headed
-```
+- bash/zsh（Mac/WSL等）
 
-UIモードでテストを選択して実行:
+  ```bash
+  docker compose up -d db backend frontend
+  cd frontend
+  npm install
+  npx playwright install chromium
+  PW_BASE_URL=http://localhost:5173 npx playwright test --headed
+  # UIモード
+  PW_BASE_URL=http://localhost:5173 npx playwright test --ui
+  ```
 
-```bash
-docker compose up -d db backend frontend
-cd frontend
-# bash / zsh の場合
-PW_BASE_URL=http://localhost:5173 npx playwright test --ui
-```
-
-Windows PowerShell では書き方が異なります。
-
-```powershell
-docker compose up -d db backend frontend
-cd frontend
-$env:PW_BASE_URL="http://localhost:5173"
-npx playwright test --ui
-```
+- Windows PowerShell
+  ```powershell
+  docker compose up -d db backend frontend
+  cd frontend
+  npm install
+  npx playwright install chromium
+  $env:PW_BASE_URL="http://localhost:5173"
+  npx playwright test --headed
+  # UIモード
+  npx playwright test --ui
+  ```
 
 ### 現在のテスト対象
 
