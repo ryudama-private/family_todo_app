@@ -217,6 +217,81 @@ docker compose down
 }
 ```
 
+### 新規タスク登録API
+
+#### エンドポイント
+
+- POST `/auth/todos/`
+
+#### 概要
+
+新しいタスク（やること）を登録します。全項目必須です。
+
+#### リクエスト例
+
+```
+POST /auth/todos/
+Content-Type: application/json
+
+{
+  "title": "テストタスク",
+  "creator_id": 1,
+  "assignee_id": 2,
+  "due_date": "2026-12-31T00:00:00",
+  "status": "未対応"
+}
+```
+
+- `title` : タスク名（文字列, 必須）
+- `creator_id` : 作成者のfamily.id（整数, 必須）
+- `assignee_id` : 担当者のfamily.id（整数, 必須）
+- `due_date` : 期限（ISO8601形式の日時文字列, 必須）
+- `status` : 進行状況（例: "未対応"、"完了" など, 必須)
+
+#### レスポンス例（201 Created）
+
+```
+{
+  "id": 1,
+  "title": "テストタスク",
+  "creator_id": 1,
+  "assignee_id": 2,
+  "due_date": "2026-12-31T00:00:00",
+  "status": "未対応",
+  "alarm_minutes": null,
+  "created_at": "2026-04-27T12:00:00",
+  "updated_at": "2026-04-27T12:00:00"
+}
+```
+
+#### エラー例
+
+- 必須項目不足
+
+```
+{
+  "error": "titleは必須です"
+}
+```
+
+- family_idが不正
+
+```
+{
+  "error": "creator_idまたはassignee_idが不正です"
+}
+```
+
+- due_dateの形式が不正
+
+```
+{
+  "error": "due_dateの形式が不正です"
+}
+```
+
+---
+
 ## テスト
 
 ### Backendテスト
@@ -313,3 +388,4 @@ docker compose run --rm e2e
 - 誤ったパスワードでログイン失敗メッセージが表示されるE2E
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
 - Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E
+- タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
