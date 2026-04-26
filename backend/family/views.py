@@ -1,15 +1,68 @@
 import json
 
 from django.conf import settings
-from django.utils.crypto import constant_time_compare
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.crypto import constant_time_compare
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
+from .models import Task, Family
 
-from .models import Family
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_task(request):
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSONが不正です'}, status=400)
+
+    # 必須項目
+    required_fields = ['title', 'creator_id', 'assignee_id', 'status']
+    for field in required_fields:
+        if not data.get(field):
+            return JsonResponse({'error': f'{field}は必須です'}, status=400)
+
+    # Family存在チェック
+    try:
+        creator = Family.objects.get(id=data['creator_id'])
+        assignee = Family.objects.get(id=data['assignee_id'])
+    except Family.DoesNotExist:
+        return JsonResponse({'error': 'creator_idまたはassignee_idが不正です'}, status=400)
+
+    # 期限
+    due_date = None
+    if 'due_date' in data and data['due_date']:
+        due_date = parse_datetime(data['due_date'])
+        if due_date is None:
+            return JsonResponse({'error': 'due_dateの形式が不正です'}, status=400)
+
+    # アラーム
+    alarm_minutes = data.get('alarm_minutes')
+    if alarm_minutes == '':
+        alarm_minutes = None
+
+    task = Task.objects.create(
+        title=data['title'],
+        creator=creator,
+        assignee=assignee,
+        due_date=due_date,
+        status=data['status'],
+        alarm_minutes=alarm_minutes
+    )
+    return JsonResponse({
+        'id': task.id,
+        'title': task.title,
+        'creator_id': task.creator.id,
+        'assignee_id': task.assignee.id,
+        'due_date': task.due_date,
+        'status': task.status,
+        'alarm_minutes': task.alarm_minutes,
+        'created_at': task.created_at,
+        'updated_at': task.updated_at,
+    }, status=201)
 
 
 def _parse_json_body(request):
