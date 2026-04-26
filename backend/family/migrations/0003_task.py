@@ -16,13 +16,13 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=255, verbose_name='やること')),
+                ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_tasks', to='family.family', verbose_name='作った人')),
+                ('assignee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_tasks', to='family.family', verbose_name='やる人')),
                 ('due_date', models.DateTimeField(verbose_name='期限')),
                 ('status', models.CharField(max_length=50, verbose_name='進行状況')),
                 ('alarm_minutes', models.IntegerField(blank=True, null=True, verbose_name='アラーム')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='作成日時')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='更新日時')),
-                ('assignee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assigned_tasks', to='family.family', verbose_name='やる人')),
-                ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_tasks', to='family.family', verbose_name='作った人')),
             ],
             options={
                 'db_table': 'task',
