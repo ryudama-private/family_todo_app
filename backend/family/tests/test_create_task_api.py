@@ -1,7 +1,7 @@
 import json
 import pytest
 from django.urls import reverse
-from family.models import Family, Task
+from family.models import Family
 
 @pytest.mark.django_db
 def test_create_task_api(client):
