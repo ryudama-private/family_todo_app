@@ -143,6 +143,7 @@ docker compose down
 | POST   | /auth/todos/                  | タスク新規登録           |
 | PATCH  | /auth/todos/{id}/title/       | タスクのタイトル変更     |
 | PATCH  | /auth/todos/{id}/assignee_id/ | タスクの担当者変更       |
+| PATCH  | /auth/todos/{id}/status/      | タスクの進行状況変更     |
 
 ### POST /auth/register/
 
@@ -399,6 +400,55 @@ Content-Type: application/json
 }
 ```
 
+### 進行状況変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/status/`
+
+#### 概要
+
+指定したタスクの進行状況を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/status/
+Content-Type: application/json
+
+{
+  "status": "進行中"
+}
+```
+
+- `status` : 新しい進行状況（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "status": "進行中"
+}
+```
+
+#### エラー例
+
+- statusが空または未指定
+
+```json
+{
+  "error": "statusは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -500,3 +550,4 @@ docker compose run --rm e2e
 - タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
 - タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
 - タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
+- タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）

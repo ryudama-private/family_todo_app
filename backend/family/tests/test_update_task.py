@@ -43,3 +43,24 @@ def test_update_task_assignee_api(client):
     url_notfound = f'/auth/todos/{random.randint(10000,99999)}/assignee_id/'
     response = client.patch(url_notfound, data=json.dumps({'assignee_id': assignee2.id}), content_type='application/json')
     assert response.status_code == 404
+
+@pytest.mark.django_db
+def test_update_task_status_api(client):
+    creator = Family.objects.create(name='status_creator', password='pw1', secret_question='q1', secret_answer='a1')
+    assignee = Family.objects.create(name='status_assignee', password='pw2', secret_question='q2', secret_answer='a2')
+    task = Task.objects.create(title='進行状況変更タスク', creator=creator, assignee=assignee, due_date='2026-12-31T00:00:00Z', status='未対応')
+    url = f'/auth/todos/{task.id}/status/'
+    # 正常系: 進行状況変更
+    response = client.patch(url, data=json.dumps({'status': '進行中'}), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['status'] == '進行中'
+    # 空文字はエラー
+    response = client.patch(url, data=json.dumps({'status': '  '}), content_type='application/json')
+    assert response.status_code == 400
+    # statusキーなしはエラー
+    response = client.patch(url, data=json.dumps({}), content_type='application/json')
+    assert response.status_code == 400
+    # 存在しないtask_idは404
+    url_notfound = f'/auth/todos/{random.randint(10000,99999)}/status/'
+    response = client.patch(url_notfound, data=json.dumps({'status': '完了'}), content_type='application/json')
+    assert response.status_code == 404
