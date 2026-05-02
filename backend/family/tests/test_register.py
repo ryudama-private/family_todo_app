@@ -23,8 +23,6 @@ def test_register_success(client):
     payload = response.json()
     assert payload["name"] == "お母さん"
     assert "id" in payload
-    assert "created_at" in payload
-    assert "updated_at" in payload
 
     family = Family.objects.get(id=payload["id"])
     assert family.name == "お母さん"

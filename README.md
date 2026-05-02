@@ -136,10 +136,12 @@ docker compose down
 
 ## API エンドポイント
 
-| Method | Path            | 説明                     |
-| ------ | --------------- | ------------------------ |
-| POST   | /auth/register/ | 家族アカウントの新規登録 |
-| POST   | /auth/login/    | ログイン                 |
+| Method | Path                    | 説明                     |
+| ------ | ----------------------- | ------------------------ |
+| POST   | /auth/register/         | 家族アカウントの新規登録 |
+| POST   | /auth/login/            | ログイン                 |
+| POST   | /auth/todos/            | タスク新規登録           |
+| PATCH  | /auth/todos/{id}/title/ | タスクのタイトル変更     |
 
 ### POST /auth/register/
 
@@ -290,6 +292,55 @@ Content-Type: application/json
 }
 ```
 
+### タイトル変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/title/`
+
+#### 概要
+
+指定したタスクのタイトルを変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/title/
+Content-Type: application/json
+
+{
+  "title": "新しいタイトル"
+}
+```
+
+- `title` : 新しいタイトル（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "title": "新しいタイトル"
+}
+```
+
+#### エラー例
+
+- titleが空または未指定
+
+```json
+{
+  "error": "titleは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -389,3 +440,4 @@ docker compose run --rm e2e
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
 - Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E
 - タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
+- タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
