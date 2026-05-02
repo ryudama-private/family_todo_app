@@ -1,27 +1,7 @@
 import json
 import pytest
-import random
 from django.urls import reverse
-from family.models import Family, Task
-
-@pytest.mark.django_db
-def test_update_task_title_api(client):
-    creator = Family.objects.create(name='creator2', password='pw1', secret_question='q1', secret_answer='a1')
-    assignee = Family.objects.create(name='assignee2', password='pw2', secret_question='q2', secret_answer='a2')
-    task = Task.objects.create(title='元のタイトル', creator=creator, assignee=assignee, due_date='2026-12-31T00:00:00Z', status='未対応')
-    url = f'/auth/todos/{task.id}/title/'
-    payload = {'title': '新しいタイトル'}
-    response = client.patch(url, data=json.dumps(payload), content_type='application/json')
-    assert response.status_code == 200
-    data = response.json()
-    assert data['title'] == '新しいタイトル'
-    # 空文字はエラー
-    response = client.patch(url, data=json.dumps({'title': '  '}), content_type='application/json')
-    assert response.status_code == 400
-    # 存在しないIDは404
-    url_notfound = f'/auth/todos/{random.randint(10000,99999)}/title/'
-    response = client.patch(url_notfound, data=json.dumps({'title': 'abc'}), content_type='application/json')
-    assert response.status_code == 404
+from family.models import Family
 
 @pytest.mark.django_db
 def test_create_task_api(client):

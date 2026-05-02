@@ -12,6 +12,28 @@ from .models import Task, Family
 
 @csrf_exempt
 @require_http_methods(['PATCH'])
+def update_task_assignee(request, task_id):
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSONが不正です'}, status=400)
+    assignee_id = data.get('assignee_id')
+    if assignee_id is None:
+        return JsonResponse({'error': 'assignee_idは必須です'}, status=400)
+    try:
+        task = Task.objects.get(id=task_id)
+    except Task.DoesNotExist:
+        return JsonResponse({'error': '指定されたタスクが存在しません'}, status=404)
+    try:
+        assignee = Family.objects.get(id=assignee_id)
+    except Family.DoesNotExist:
+        return JsonResponse({'error': '指定された担当者が存在しません'}, status=400)
+    task.assignee = assignee
+    task.save()
+    return JsonResponse({'assignee_id': task.assignee.id}, status=200)
+
+@csrf_exempt
+@require_http_methods(['PATCH'])
 def update_task_title(request, task_id):
     try:
         data = json.loads(request.body)
