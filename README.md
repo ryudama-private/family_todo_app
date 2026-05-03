@@ -260,9 +260,7 @@ Content-Type: application/json
   "assignee_id": 2,
   "due_date": "2026-12-31T00:00:00",
   "status": "未対応",
-  "alarm_minutes": null,
-  "created_at": "2026-04-27T12:00:00",
-  "updated_at": "2026-04-27T12:00:00"
+  "alarm_minutes": null
 }
 ```
 

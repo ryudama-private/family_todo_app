@@ -108,8 +108,6 @@ def create_task(request):
         'due_date': task.due_date,
         'status': task.status,
         'alarm_minutes': task.alarm_minutes,
-        'created_at': task.created_at,
-        'updated_at': task.updated_at,
     }, status=201)
 
 def _parse_json_body(request):
