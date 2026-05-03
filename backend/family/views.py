@@ -30,11 +30,7 @@ def update_task_alarm_minutes(request, task_id):
         return JsonResponse({'error': 'alarm_minutesは必須です'}, status=400)
     alarm_minutes = data['alarm_minutes']
     if alarm_minutes is not None:
-        if isinstance(alarm_minutes, bool):
-            return JsonResponse({'error': 'alarm_minutesは整数またはnullで指定してください'}, status=400)
-        try:
-            alarm_minutes = int(alarm_minutes)
-        except (TypeError, ValueError):
+        if isinstance(alarm_minutes, bool) or not isinstance(alarm_minutes, int):
             return JsonResponse({'error': 'alarm_minutesは整数またはnullで指定してください'}, status=400)
         if alarm_minutes < 0:
             return JsonResponse({'error': 'alarm_minutesは0以上の整数で指定してください'}, status=400)

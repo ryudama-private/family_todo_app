@@ -132,6 +132,9 @@ def test_update_task_alarm_minutes_api(client):
     # 文字列はエラー
     response = client.patch(url, data=json.dumps({'alarm_minutes': 'abc'}), content_type='application/json')
     assert response.status_code == 400
+    # 小数はエラー
+    response = client.patch(url, data=json.dumps({'alarm_minutes': 1.5}), content_type='application/json')
+    assert response.status_code == 400
     # 存在しないtask_idは404
     url_notfound = f'/auth/todos/{random.randint(10000,99999)}/alarm_minutes/'
     response = client.patch(url_notfound, data=json.dumps({'alarm_minutes': 10}), content_type='application/json')
