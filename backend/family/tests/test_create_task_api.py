@@ -19,6 +19,7 @@ def test_create_task_api(client):
     assert response.status_code == 201
     data = response.json()
     assert data['title'] == 'テストタスク'
+    assert set(data.keys()) == {'id', 'title', 'creator_id', 'assignee_id', 'due_date', 'status', 'alarm_minutes'}
 
 @pytest.mark.django_db
 def test_create_task_api_required_fields(client):
