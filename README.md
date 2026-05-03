@@ -136,10 +136,14 @@ docker compose down
 
 ## API エンドポイント
 
-| Method | Path            | 説明                     |
-| ------ | --------------- | ------------------------ |
-| POST   | /auth/register/ | 家族アカウントの新規登録 |
-| POST   | /auth/login/    | ログイン                 |
+| Method | Path                          | 説明                     |
+| ------ | ----------------------------- | ------------------------ |
+| POST   | /auth/register/               | 家族アカウントの新規登録 |
+| POST   | /auth/login/                  | ログイン                 |
+| POST   | /auth/todos/                  | タスク新規登録           |
+| PATCH  | /auth/todos/{id}/title/       | タスクのタイトル変更     |
+| PATCH  | /auth/todos/{id}/assignee_id/ | タスクの担当者変更       |
+| PATCH  | /auth/todos/{id}/status/      | タスクの進行状況変更     |
 
 ### POST /auth/register/
 
@@ -159,9 +163,7 @@ docker compose down
 ```json
 {
   "id": 1,
-  "name": "お母さん",
-  "created_at": "2026-04-14T00:00:00+09:00",
-  "updated_at": "2026-04-14T00:00:00+09:00"
+  "name": "お母さん"
 }
 ```
 
@@ -290,6 +292,161 @@ Content-Type: application/json
 }
 ```
 
+### タイトル変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/title/`
+
+#### 概要
+
+指定したタスクのタイトルを変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/title/
+Content-Type: application/json
+
+{
+  "title": "新しいタイトル"
+}
+```
+
+- `title` : 新しいタイトル（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "title": "新しいタイトル"
+}
+```
+
+#### エラー例
+
+- titleが空または未指定
+
+```json
+{
+  "error": "titleは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### 担当者変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/assignee_id/`
+
+#### 概要
+
+指定したタスクの担当者を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/assignee_id/
+Content-Type: application/json
+
+{
+  "assignee_id": 3
+}
+```
+
+- `assignee_id` : 新しい担当者のfamily.id（整数, 必須）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "assignee_id": 3
+}
+```
+
+#### エラー例
+
+- assignee_idが未指定
+
+```json
+{
+  "error": "assignee_idは必須です"
+}
+```
+
+- 指定したassignee_idのfamilyが存在しない
+
+```json
+{
+  "error": "指定された担当者が存在しません"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### 進行状況変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/status/`
+
+#### 概要
+
+指定したタスクの進行状況を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/status/
+Content-Type: application/json
+
+{
+  "status": "進行中"
+}
+```
+
+- `status` : 新しい進行状況（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "status": "進行中"
+}
+```
+
+#### エラー例
+
+- statusが空または未指定
+
+```json
+{
+  "error": "statusは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -389,3 +546,6 @@ docker compose run --rm e2e
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
 - Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E
 - タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
+- タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
+- タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
+- タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
