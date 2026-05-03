@@ -107,3 +107,35 @@ def test_update_task_due_date_api(client):
     # JSON配列はエラー
     response = client.patch(url, data='[]', content_type='application/json')
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_update_task_alarm_minutes_api(client):
+    creator = Family.objects.create(name='alarm_creator', password='pw1', secret_question='q1', secret_answer='a1')
+    assignee = Family.objects.create(name='alarm_assignee', password='pw2', secret_question='q2', secret_answer='a2')
+    task = Task.objects.create(title='アラーム変更タスク', creator=creator, assignee=assignee, due_date='2026-12-31T00:00:00Z', status='未対応')
+    url = f'/auth/todos/{task.id}/alarm_minutes/'
+    # 正常系: 整数で変更
+    response = client.patch(url, data=json.dumps({'alarm_minutes': 30}), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['alarm_minutes'] == 30
+    # 正常系: nullでアラーム解除
+    response = client.patch(url, data=json.dumps({'alarm_minutes': None}), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['alarm_minutes'] is None
+    # alarm_minutesキーなしはエラー
+    response = client.patch(url, data=json.dumps({}), content_type='application/json')
+    assert response.status_code == 400
+    # 負の値はエラー
+    response = client.patch(url, data=json.dumps({'alarm_minutes': -1}), content_type='application/json')
+    assert response.status_code == 400
+    # 文字列はエラー
+    response = client.patch(url, data=json.dumps({'alarm_minutes': 'abc'}), content_type='application/json')
+    assert response.status_code == 400
+    # 存在しないtask_idは404
+    url_notfound = f'/auth/todos/{random.randint(10000,99999)}/alarm_minutes/'
+    response = client.patch(url_notfound, data=json.dumps({'alarm_minutes': 10}), content_type='application/json')
+    assert response.status_code == 404
+    # JSON配列はエラー
+    response = client.patch(url, data='[]', content_type='application/json')
+    assert response.status_code == 400

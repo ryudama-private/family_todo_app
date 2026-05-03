@@ -12,6 +12,32 @@ from .models import Task, Family
 
 @csrf_exempt
 @require_http_methods(['PATCH'])
+def update_task_alarm_minutes(request, task_id):
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
+    if 'alarm_minutes' not in data:
+        return JsonResponse({'error': 'alarm_minutesは必須です'}, status=400)
+    alarm_minutes = data['alarm_minutes']
+    if alarm_minutes is not None:
+        if isinstance(alarm_minutes, bool):
+            return JsonResponse({'error': 'alarm_minutesは整数またはnullで指定してください'}, status=400)
+        try:
+            alarm_minutes = int(alarm_minutes)
+        except (TypeError, ValueError):
+            return JsonResponse({'error': 'alarm_minutesは整数またはnullで指定してください'}, status=400)
+        if alarm_minutes < 0:
+            return JsonResponse({'error': 'alarm_minutesは0以上の整数で指定してください'}, status=400)
+    try:
+        task = Task.objects.get(id=task_id)
+    except Task.DoesNotExist:
+        return JsonResponse({'error': '指定されたタスクが存在しません'}, status=404)
+    task.alarm_minutes = alarm_minutes
+    task.save()
+    return JsonResponse({'alarm_minutes': task.alarm_minutes}, status=200)
+
+@csrf_exempt
+@require_http_methods(['PATCH'])
 def update_task_due_date(request, task_id):
     data, error_response = _parse_json_body(request)
     if error_response:

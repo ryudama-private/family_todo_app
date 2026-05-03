@@ -136,15 +136,16 @@ docker compose down
 
 ## API エンドポイント
 
-| Method | Path                          | 説明                     |
-| ------ | ----------------------------- | ------------------------ |
-| POST   | /auth/register/               | 家族アカウントの新規登録 |
-| POST   | /auth/login/                  | ログイン                 |
-| POST   | /auth/todos/                  | タスク新規登録           |
-| PATCH  | /auth/todos/{id}/title/       | タスクのタイトル変更     |
-| PATCH  | /auth/todos/{id}/assignee_id/ | タスクの担当者変更       |
-| PATCH  | /auth/todos/{id}/due_date/    | タスクの期限変更         |
-| PATCH  | /auth/todos/{id}/status/      | タスクの進行状況変更     |
+| Method | Path                            | 説明                     |
+| ------ | ------------------------------- | ------------------------ |
+| POST   | /auth/register/                 | 家族アカウントの新規登録 |
+| POST   | /auth/login/                    | ログイン                 |
+| POST   | /auth/todos/                    | タスク新規登録           |
+| PATCH  | /auth/todos/{id}/title/         | タスクのタイトル変更     |
+| PATCH  | /auth/todos/{id}/assignee_id/   | タスクの担当者変更       |
+| PATCH  | /auth/todos/{id}/due_date/      | タスクの期限変更         |
+| PATCH  | /auth/todos/{id}/alarm_minutes/ | タスクのアラーム時間変更 |
+| PATCH  | /auth/todos/{id}/status/        | タスクの進行状況変更     |
 
 ### POST /auth/register/
 
@@ -503,6 +504,71 @@ Content-Type: application/json
 }
 ```
 
+### アラーム時間変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/alarm_minutes/`
+
+#### 概要
+
+指定したタスクのアラーム時間を変更します。`null` を送るとアラームを解除できます。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/alarm_minutes/
+Content-Type: application/json
+
+{
+  "alarm_minutes": 30
+}
+```
+
+- `alarm_minutes` : 期限の何分前にアラームを鳴らすか（整数，必須，0以上）または `null`（アラーム解除）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "alarm_minutes": 30
+}
+```
+
+#### アラーム解除時
+
+```json
+{
+  "alarm_minutes": null
+}
+```
+
+#### エラー例
+
+- alarm_minutesキーが未指定
+
+```json
+{
+  "error": "alarm_minutesは必須です"
+}
+```
+
+- 整数以外または負の値
+
+```json
+{
+  "error": "alarm_minutesは0以上の整数で指定してください"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -605,4 +671,5 @@ docker compose run --rm e2e
 - タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
 - タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
 - タスク期限変更APIのテスト（正常系・空文字エラー・キーなしエラー・形式不正エラー・存在しないタスクIDの404）
+- タスクアラーム時間変更APIのテスト（正常系・アラーム解除（null）・キーなしエラー・負値エラー・文字列エラー・存在しないタスクIDの404）
 - タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
