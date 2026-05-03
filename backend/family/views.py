@@ -13,10 +13,9 @@ from .models import Task, Family
 @csrf_exempt
 @require_http_methods(['PATCH'])
 def update_task_status(request, task_id):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'JSONが不正です'}, status=400)
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
     status = data.get('status')
     if not isinstance(status, str) or not status.strip():
         return JsonResponse({'error': 'statusは必須です'}, status=400)
@@ -31,13 +30,18 @@ def update_task_status(request, task_id):
 @csrf_exempt
 @require_http_methods(['PATCH'])
 def update_task_assignee(request, task_id):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'JSONが不正です'}, status=400)
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
     assignee_id = data.get('assignee_id')
     if assignee_id is None:
         return JsonResponse({'error': 'assignee_idは必須です'}, status=400)
+    if isinstance(assignee_id, bool):
+        return JsonResponse({'error': 'assignee_idは整数で指定してください'}, status=400)
+    try:
+        assignee_id = int(assignee_id)
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'assignee_idは整数で指定してください'}, status=400)
     try:
         task = Task.objects.get(id=task_id)
     except Task.DoesNotExist:
@@ -53,10 +57,9 @@ def update_task_assignee(request, task_id):
 @csrf_exempt
 @require_http_methods(['PATCH'])
 def update_task_title(request, task_id):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'JSONが不正です'}, status=400)
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
     title = data.get('title')
     if not isinstance(title, str) or not title.strip():
         return JsonResponse({'error': 'titleは必須です'}, status=400)
@@ -71,11 +74,10 @@ def update_task_title(request, task_id):
 @csrf_exempt
 @require_http_methods(['POST'])
 def create_task(request):
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return JsonResponse({'error': 'JSONが不正です'}, status=400)
-    required_fields = ['title', 'creator_id', 'assignee_id', 'status']
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
+    required_fields = ['title', 'creator_id', 'assignee_id', 'due_date', 'status']
     for field in required_fields:
         if not data.get(field):
             return JsonResponse({'error': f'{field}は必須です'}, status=400)
@@ -84,11 +86,9 @@ def create_task(request):
         assignee = Family.objects.get(id=data['assignee_id'])
     except Family.DoesNotExist:
         return JsonResponse({'error': 'creator_idまたはassignee_idが不正です'}, status=400)
-    due_date = None
-    if 'due_date' in data and data['due_date']:
-        due_date = parse_datetime(data['due_date'])
-        if due_date is None:
-            return JsonResponse({'error': 'due_dateの形式が不正です'}, status=400)
+    due_date = parse_datetime(data['due_date'])
+    if due_date is None:
+        return JsonResponse({'error': 'due_dateの形式が不正です'}, status=400)
     alarm_minutes = data.get('alarm_minutes')
     if alarm_minutes == '':
         alarm_minutes = None

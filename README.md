@@ -163,9 +163,7 @@ docker compose down
 ```json
 {
   "id": 1,
-  "name": "お母さん",
-  "created_at": "2026-04-14T00:00:00+09:00",
-  "updated_at": "2026-04-14T00:00:00+09:00"
+  "name": "お母さん"
 }
 ```
 

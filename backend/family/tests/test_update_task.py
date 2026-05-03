@@ -21,6 +21,9 @@ def test_update_task_title_api(client):
     url_notfound = f'/auth/todos/{random.randint(10000,99999)}/title/'
     response = client.patch(url_notfound, data=json.dumps({'title': 'abc'}), content_type='application/json')
     assert response.status_code == 404
+    # JSON配列はエラー
+    response = client.patch(url, data='[]', content_type='application/json')
+    assert response.status_code == 400
 
 @pytest.mark.django_db
 def test_update_task_assignee_api(client):
@@ -33,6 +36,13 @@ def test_update_task_assignee_api(client):
     response = client.patch(url, data=json.dumps({'assignee_id': assignee2.id}), content_type='application/json')
     assert response.status_code == 200
     assert response.json()['assignee_id'] == assignee2.id
+    # 整数字符列も許可
+    response = client.patch(url, data=json.dumps({'assignee_id': str(assignee1.id)}), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['assignee_id'] == assignee1.id
+    # 非整数はエラー
+    response = client.patch(url, data=json.dumps({'assignee_id': 'abc'}), content_type='application/json')
+    assert response.status_code == 400
     # assignee_idなしはエラー
     response = client.patch(url, data=json.dumps({}), content_type='application/json')
     assert response.status_code == 400
@@ -43,6 +53,9 @@ def test_update_task_assignee_api(client):
     url_notfound = f'/auth/todos/{random.randint(10000,99999)}/assignee_id/'
     response = client.patch(url_notfound, data=json.dumps({'assignee_id': assignee2.id}), content_type='application/json')
     assert response.status_code == 404
+    # JSON配列はエラー
+    response = client.patch(url, data='[]', content_type='application/json')
+    assert response.status_code == 400
 
 @pytest.mark.django_db
 def test_update_task_status_api(client):
@@ -64,3 +77,6 @@ def test_update_task_status_api(client):
     url_notfound = f'/auth/todos/{random.randint(10000,99999)}/status/'
     response = client.patch(url_notfound, data=json.dumps({'status': '完了'}), content_type='application/json')
     assert response.status_code == 404
+    # JSON配列はエラー
+    response = client.patch(url, data='[]', content_type='application/json')
+    assert response.status_code == 400
