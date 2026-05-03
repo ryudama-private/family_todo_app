@@ -11,6 +11,16 @@ from django.views.decorators.http import require_POST, require_http_methods
 from .models import Task, Family
 
 @csrf_exempt
+@require_http_methods(['DELETE'])
+def delete_task(request, task_id):
+    try:
+        task = Task.objects.get(id=task_id)
+    except Task.DoesNotExist:
+        return JsonResponse({'error': '指定されたタスクが存在しません'}, status=404)
+    task.delete()
+    return JsonResponse({'deleted_id': task_id}, status=200)
+
+@csrf_exempt
 @require_http_methods(['PATCH'])
 def update_task_alarm_minutes(request, task_id):
     data, error_response = _parse_json_body(request)

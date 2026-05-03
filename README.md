@@ -146,6 +146,7 @@ docker compose down
 | PATCH  | /auth/todos/{id}/due_date/      | タスクの期限変更         |
 | PATCH  | /auth/todos/{id}/alarm_minutes/ | タスクのアラーム時間変更 |
 | PATCH  | /auth/todos/{id}/status/        | タスクの進行状況変更     |
+| DELETE | /auth/todos/{id}/               | タスクの削除             |
 
 ### POST /auth/register/
 
@@ -569,6 +570,40 @@ Content-Type: application/json
 }
 ```
 
+### タスク削除API
+
+#### エンドポイント
+
+- DELETE `/auth/todos/{id}/`
+
+#### 概要
+
+指定したタスクを削除します。
+
+#### リクエスト例
+
+```
+DELETE /auth/todos/1/
+```
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "deleted_id": 1
+}
+```
+
+#### エラー例
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -673,3 +708,4 @@ docker compose run --rm e2e
 - タスク期限変更APIのテスト（正常系・空文字エラー・キーなしエラー・形式不正エラー・存在しないタスクIDの404）
 - タスクアラーム時間変更APIのテスト（正常系・アラーム解除（null）・キーなしエラー・負値エラー・文字列エラー・存在しないタスクIDの404）
 - タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
+- タスク削除APIのテスト（正常系・DBから削除されることの確認・存在しないタスクIDの404）
