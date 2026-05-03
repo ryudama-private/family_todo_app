@@ -12,6 +12,26 @@ from .models import Task, Family
 
 @csrf_exempt
 @require_http_methods(['PATCH'])
+def update_task_due_date(request, task_id):
+    data, error_response = _parse_json_body(request)
+    if error_response:
+        return error_response
+    due_date_str = data.get('due_date')
+    if not isinstance(due_date_str, str) or not due_date_str.strip():
+        return JsonResponse({'error': 'due_dateは必須です'}, status=400)
+    due_date = parse_datetime(due_date_str.strip())
+    if due_date is None:
+        return JsonResponse({'error': 'due_dateの形式が不正です'}, status=400)
+    try:
+        task = Task.objects.get(id=task_id)
+    except Task.DoesNotExist:
+        return JsonResponse({'error': '指定されたタスクが存在しません'}, status=404)
+    task.due_date = due_date
+    task.save()
+    return JsonResponse({'due_date': task.due_date}, status=200)
+
+@csrf_exempt
+@require_http_methods(['PATCH'])
 def update_task_status(request, task_id):
     data, error_response = _parse_json_body(request)
     if error_response:

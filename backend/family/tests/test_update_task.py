@@ -80,3 +80,30 @@ def test_update_task_status_api(client):
     # JSON配列はエラー
     response = client.patch(url, data='[]', content_type='application/json')
     assert response.status_code == 400
+
+@pytest.mark.django_db
+def test_update_task_due_date_api(client):
+    creator = Family.objects.create(name='due_creator', password='pw1', secret_question='q1', secret_answer='a1')
+    assignee = Family.objects.create(name='due_assignee', password='pw2', secret_question='q2', secret_answer='a2')
+    task = Task.objects.create(title='期限変更タスク', creator=creator, assignee=assignee, due_date='2026-12-31T00:00:00Z', status='未対応')
+    url = f'/auth/todos/{task.id}/due_date/'
+    # 正常系: 期限変更
+    response = client.patch(url, data=json.dumps({'due_date': '2027-01-15T09:30:00Z'}), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['due_date'] == '2027-01-15T09:30:00Z'
+    # 空文字はエラー
+    response = client.patch(url, data=json.dumps({'due_date': '  '}), content_type='application/json')
+    assert response.status_code == 400
+    # due_dateキーなしはエラー
+    response = client.patch(url, data=json.dumps({}), content_type='application/json')
+    assert response.status_code == 400
+    # 形式不正はエラー
+    response = client.patch(url, data=json.dumps({'due_date': 'not-a-datetime'}), content_type='application/json')
+    assert response.status_code == 400
+    # 存在しないtask_idは404
+    url_notfound = f'/auth/todos/{random.randint(10000,99999)}/due_date/'
+    response = client.patch(url_notfound, data=json.dumps({'due_date': '2027-01-15T09:30:00Z'}), content_type='application/json')
+    assert response.status_code == 404
+    # JSON配列はエラー
+    response = client.patch(url, data='[]', content_type='application/json')
+    assert response.status_code == 400

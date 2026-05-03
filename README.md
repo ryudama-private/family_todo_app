@@ -143,6 +143,7 @@ docker compose down
 | POST   | /auth/todos/                  | タスク新規登録           |
 | PATCH  | /auth/todos/{id}/title/       | タスクのタイトル変更     |
 | PATCH  | /auth/todos/{id}/assignee_id/ | タスクの担当者変更       |
+| PATCH  | /auth/todos/{id}/due_date/    | タスクの期限変更         |
 | PATCH  | /auth/todos/{id}/status/      | タスクの進行状況変更     |
 
 ### POST /auth/register/
@@ -445,6 +446,63 @@ Content-Type: application/json
 }
 ```
 
+### 期限変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/due_date/`
+
+#### 概要
+
+指定したタスクの期限を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/due_date/
+Content-Type: application/json
+
+{
+  "due_date": "2027-01-15T09:30:00Z"
+}
+```
+
+- `due_date` : 新しい期限（ISO8601形式の日時文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "due_date": "2027-01-15T09:30:00Z"
+}
+```
+
+#### エラー例
+
+- due_dateが空または未指定
+
+```json
+{
+  "error": "due_dateは必須です"
+}
+```
+
+- due_dateの形式が不正
+
+```json
+{
+  "error": "due_dateの形式が不正です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
 ---
 
 ## テスト
@@ -546,4 +604,5 @@ docker compose run --rm e2e
 - タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
 - タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
 - タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
+- タスク期限変更APIのテスト（正常系・空文字エラー・キーなしエラー・形式不正エラー・存在しないタスクIDの404）
 - タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
