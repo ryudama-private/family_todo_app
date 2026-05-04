@@ -26,7 +26,19 @@ def _serialize_task(task):
 @require_http_methods(['GET'])
 def list_tasks(request):
     tasks = Task.objects.select_related('creator', 'assignee').order_by('id')
-    return JsonResponse({'tasks': [_serialize_task(task) for task in tasks]}, status=200)
+    return JsonResponse(
+        {
+            'tasks': [
+                {
+                    **_serialize_task(task),
+                    'creator_name': task.creator.name,
+                    'assignee_name': task.assignee.name,
+                }
+                for task in tasks
+            ]
+        },
+        status=200,
+    )
 
 @csrf_exempt
 @require_http_methods(['DELETE'])

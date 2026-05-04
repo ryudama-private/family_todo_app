@@ -8,8 +8,6 @@
 <style scoped>
 .panel {
   min-height: 100%;
-  border: 1px solid #c9d3e4;
-  background: rgba(255, 255, 255, 0.88);
   padding: 28px;
   box-sizing: border-box;
 }
