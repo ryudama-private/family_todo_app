@@ -61,7 +61,7 @@ describe("LoginPage", () => {
     expect(wrapper.get("button[type='submit']").text()).toBe("ログイン");
   });
 
-  it("名前とパスワードを入力してログイン成功時に /todo へ遷移する", async () => {
+  it("名前とパスワードを入力してログイン成功時に /todo/tasks へ遷移する", async () => {
     await wrapper.get("#name").setValue("テスト太郎");
     await wrapper.get("#password").setValue("password123");
 
@@ -86,7 +86,7 @@ describe("LoginPage", () => {
       },
     );
     expect(localStorage.getItem("loggedInFamilyName")).toBe("テスト太郎");
-    expect(pushMock).toHaveBeenCalledWith("/todo");
+    expect(pushMock).toHaveBeenCalledWith("/todo/tasks");
   });
 
   it("ログイン失敗時にエラーメッセージを表示する", async () => {

@@ -53,11 +53,14 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 
 - frontend/src/pages/LoginPage.vue: ログイン画面
 - frontend/src/pages/FamilyRegisterPage.vue: 家族登録画面
-- frontend/src/pages/TodoPage.vue: Todoメイン画面
+- frontend/src/pages/TopPage.vue: Topレイアウト画面（サイドバー＋RouterView）
+- frontend/src/pages/TasksPage.vue: タスク一覧画面
+- frontend/src/pages/CalendarPage.vue: カレンダー画面
 - frontend/src/router/index.js: 画面ルーティング
 - frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
 - frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
-- frontend/src/pages/TodoPage.test.js: Todo画面のVitest
+- frontend/src/pages/TopPage.test.js: Top画面のVitest
+- frontend/src/pages/TasksPage.test.js: タスク一覧画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
 - frontend/e2e/login.spec.js: ログイン画面のPlaywright E2E
@@ -80,7 +83,8 @@ docker compose up --build
 ## 画面構成
 
 - /login: ログイン画面
-- /todo: Todoメイン画面
+- /todo/tasks: TODO一覧画面
+- /todo/calendar: カレンダー画面
 - /family/register: 家族登録画面
 - /: /login にリダイレクト
 
@@ -136,10 +140,18 @@ docker compose down
 
 ## API エンドポイント
 
-| Method | Path            | 説明                     |
-| ------ | --------------- | ------------------------ |
-| POST   | /auth/register/ | 家族アカウントの新規登録 |
-| POST   | /auth/login/    | ログイン                 |
+| Method | Path                            | 説明                     |
+| ------ | ------------------------------- | ------------------------ |
+| POST   | /auth/register/                 | 家族アカウントの新規登録 |
+| POST   | /auth/login/                    | ログイン                 |
+| GET    | /auth/todos/                    | タスク一覧取得           |
+| POST   | /auth/todos/create/             | タスク新規登録           |
+| PATCH  | /auth/todos/{id}/title/         | タスクのタイトル変更     |
+| PATCH  | /auth/todos/{id}/assignee_id/   | タスクの担当者変更       |
+| PATCH  | /auth/todos/{id}/due_date/      | タスクの期限変更         |
+| PATCH  | /auth/todos/{id}/alarm_minutes/ | タスクのアラーム時間変更 |
+| PATCH  | /auth/todos/{id}/status/        | タスクの進行状況変更     |
+| DELETE | /auth/todos/{id}/               | タスクの削除             |
 
 ### POST /auth/register/
 
@@ -159,9 +171,7 @@ docker compose down
 ```json
 {
   "id": 1,
-  "name": "お母さん",
-  "created_at": "2026-04-14T00:00:00+09:00",
-  "updated_at": "2026-04-14T00:00:00+09:00"
+  "name": "お母さん"
 }
 ```
 
@@ -216,6 +226,420 @@ docker compose down
   }
 }
 ```
+
+### タスク一覧取得API
+
+#### エンドポイント
+
+- GET `/auth/todos/`
+
+#### 概要
+
+登録済みのタスクをすべて取得します。id昇順で返します。
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "テストタスク",
+      "creator_id": 1,
+      "creator_name": "お母さん",
+      "assignee_id": 2,
+      "assignee_name": "お父さん",
+      "due_date": "2026-12-31T00:00:00Z",
+      "status": "未対応",
+      "alarm_minutes": null
+    }
+  ]
+}
+```
+
+### 新規タスク登録API
+
+#### エンドポイント
+
+- POST `/auth/todos/create/`
+
+#### 概要
+
+新しいタスク（やること）を登録します。全項目必須です。
+
+#### リクエスト例
+
+```
+POST /auth/todos/create/
+Content-Type: application/json
+
+{
+  "title": "テストタスク",
+  "creator_id": 1,
+  "assignee_id": 2,
+  "due_date": "2026-12-31T00:00:00",
+  "status": "未対応"
+}
+```
+
+- `title` : タスク名（文字列, 必須）
+- `creator_id` : 作成者のfamily.id（整数, 必須）
+- `assignee_id` : 担当者のfamily.id（整数, 必須）
+- `due_date` : 期限（ISO8601形式の日時文字列, 必須）
+- `status` : 進行状況（例: "未対応"、"完了" など, 必須)
+
+#### レスポンス例（201 Created）
+
+```
+{
+  "id": 1,
+  "title": "テストタスク",
+  "creator_id": 1,
+  "assignee_id": 2,
+  "due_date": "2026-12-31T00:00:00",
+  "status": "未対応",
+  "alarm_minutes": null
+}
+```
+
+#### エラー例
+
+- 必須項目不足
+
+```
+{
+  "error": "titleは必須です"
+}
+```
+
+- family_idが不正
+
+```
+{
+  "error": "creator_idまたはassignee_idが不正です"
+}
+```
+
+- due_dateの形式が不正
+
+```
+{
+  "error": "due_dateの形式が不正です"
+}
+```
+
+### タイトル変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/title/`
+
+#### 概要
+
+指定したタスクのタイトルを変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/title/
+Content-Type: application/json
+
+{
+  "title": "新しいタイトル"
+}
+```
+
+- `title` : 新しいタイトル（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "title": "新しいタイトル"
+}
+```
+
+#### エラー例
+
+- titleが空または未指定
+
+```json
+{
+  "error": "titleは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### 担当者変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/assignee_id/`
+
+#### 概要
+
+指定したタスクの担当者を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/assignee_id/
+Content-Type: application/json
+
+{
+  "assignee_id": 3
+}
+```
+
+- `assignee_id` : 新しい担当者のfamily.id（整数, 必須）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "assignee_id": 3
+}
+```
+
+#### エラー例
+
+- assignee_idが未指定
+
+```json
+{
+  "error": "assignee_idは必須です"
+}
+```
+
+- 指定したassignee_idのfamilyが存在しない
+
+```json
+{
+  "error": "指定された担当者が存在しません"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### 進行状況変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/status/`
+
+#### 概要
+
+指定したタスクの進行状況を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/status/
+Content-Type: application/json
+
+{
+  "status": "進行中"
+}
+```
+
+- `status` : 新しい進行状況（文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "status": "進行中"
+}
+```
+
+#### エラー例
+
+- statusが空または未指定
+
+```json
+{
+  "error": "statusは必須です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### 期限変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/due_date/`
+
+#### 概要
+
+指定したタスクの期限を変更します。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/due_date/
+Content-Type: application/json
+
+{
+  "due_date": "2027-01-15T09:30:00Z"
+}
+```
+
+- `due_date` : 新しい期限（ISO8601形式の日時文字列, 必須, 空文字不可）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "due_date": "2027-01-15T09:30:00Z"
+}
+```
+
+#### エラー例
+
+- due_dateが空または未指定
+
+```json
+{
+  "error": "due_dateは必須です"
+}
+```
+
+- due_dateの形式が不正
+
+```json
+{
+  "error": "due_dateの形式が不正です"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### アラーム時間変更API
+
+#### エンドポイント
+
+- PATCH `/auth/todos/{id}/alarm_minutes/`
+
+#### 概要
+
+指定したタスクのアラーム時間を変更します。`null` を送るとアラームを解除できます。
+
+#### リクエスト例
+
+```
+PATCH /auth/todos/1/alarm_minutes/
+Content-Type: application/json
+
+{
+  "alarm_minutes": 30
+}
+```
+
+- `alarm_minutes` : 期限の何分前にアラームを鳴らすか（整数，必須，0以上）または `null`（アラーム解除）
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "alarm_minutes": 30
+}
+```
+
+#### アラーム解除時
+
+```json
+{
+  "alarm_minutes": null
+}
+```
+
+#### エラー例
+
+- alarm_minutesキーが未指定
+
+```json
+{
+  "error": "alarm_minutesは必須です"
+}
+```
+
+- 整数以外または負の値
+
+```json
+{
+  "error": "alarm_minutesは0以上の整数で指定してください"
+}
+```
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+### タスク削除API
+
+#### エンドポイント
+
+- DELETE `/auth/todos/{id}/`
+
+#### 概要
+
+指定したタスクを削除します。
+
+#### リクエスト例
+
+```
+DELETE /auth/todos/1/
+```
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "deleted_id": 1
+}
+```
+
+#### エラー例
+
+- 指定したIDのタスクが存在しない
+
+```json
+{
+  "error": "指定されたタスクが存在しません"
+}
+```
+
+---
 
 ## テスト
 
@@ -313,3 +737,10 @@ docker compose run --rm e2e
 - 誤ったパスワードでログイン失敗メッセージが表示されるE2E
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
 - Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E
+- タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
+- タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
+- タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
+- タスク期限変更APIのテスト（正常系・空文字エラー・キーなしエラー・形式不正エラー・存在しないタスクIDの404）
+- タスクアラーム時間変更APIのテスト（正常系・アラーム解除（null）・キーなしエラー・負値エラー・文字列エラー・存在しないタスクIDの404）
+- タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
+- タスク削除APIのテスト（正常系・DBから削除されることの確認・存在しないタスクIDの404）

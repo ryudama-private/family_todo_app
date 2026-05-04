@@ -8,8 +8,22 @@
         </div>
 
         <nav class="menu" aria-label="todo-menu">
-          <button type="button" class="nav">TODO 一覧</button>
-          <button type="button" class="nav">カレンダー</button>
+          <button
+            type="button"
+            class="nav"
+            :class="{ active: route.path === '/todo/tasks' }"
+            @click="goToTasks"
+          >
+            TODO 一覧
+          </button>
+          <button
+            type="button"
+            class="nav"
+            :class="{ active: route.path === '/todo/calendar' }"
+            @click="goToCalendar"
+          >
+            カレンダー
+          </button>
         </nav>
 
         <button type="button" class="logout-btn" @click="onLogout">
@@ -17,20 +31,35 @@
         </button>
       </aside>
 
-      <section class="content" aria-label="todo-content"></section>
+      <section class="content" aria-label="todo-content">
+        <RouterView />
+      </section>
     </section>
   </main>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 
 const loggedInName = ref(
   localStorage.getItem("loggedInFamilyName") || "ログインしている人",
 );
+
+const goToTasks = async () => {
+  if (route.path !== "/todo/tasks") {
+    await router.push("/todo/tasks");
+  }
+};
+
+const goToCalendar = async () => {
+  if (route.path !== "/todo/calendar") {
+    await router.push("/todo/calendar");
+  }
+};
 
 const onLogout = async () => {
   localStorage.removeItem("loggedInFamilyName");
@@ -98,6 +127,16 @@ const onLogout = async () => {
   letter-spacing: 0.03em;
   margin-top: auto;
   cursor: pointer;
+}
+
+.content {
+  padding: 28px 32px;
+  background: linear-gradient(180deg, #fcfdff 0%, #f4f7fb 100%);
+}
+
+.nav.active {
+  background: #dbe7ff;
+  font-weight: 700;
 }
 
 .nav:hover,
