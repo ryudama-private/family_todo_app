@@ -10,6 +10,31 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from .models import Task, Family
 
+
+def _serialize_task(task):
+    return {
+        'id': task.id,
+        'title': task.title,
+        'creator_id': task.creator.id,
+        'assignee_id': task.assignee.id,
+        'due_date': task.due_date,
+        'status': task.status,
+        'alarm_minutes': task.alarm_minutes,
+    }
+
+
+@csrf_exempt
+@require_http_methods(['GET', 'POST'])
+def todos(request):
+    if request.method == 'GET':
+        return list_tasks(request)
+    return create_task(request)
+
+
+def list_tasks(request):
+    tasks = Task.objects.select_related('creator', 'assignee').order_by('id')
+    return JsonResponse({'tasks': [_serialize_task(task) for task in tasks]}, status=200)
+
 @csrf_exempt
 @require_http_methods(['DELETE'])
 def delete_task(request, task_id):
@@ -123,8 +148,6 @@ def update_task_title(request, task_id):
     task.save()
     return JsonResponse({'title': task.title}, status=200)
 
-@csrf_exempt
-@require_http_methods(['POST'])
 def create_task(request):
     data, error_response = _parse_json_body(request)
     if error_response:
@@ -152,15 +175,7 @@ def create_task(request):
         status=data['status'],
         alarm_minutes=alarm_minutes
     )
-    return JsonResponse({
-        'id': task.id,
-        'title': task.title,
-        'creator_id': task.creator.id,
-        'assignee_id': task.assignee.id,
-        'due_date': task.due_date,
-        'status': task.status,
-        'alarm_minutes': task.alarm_minutes,
-    }, status=201)
+    return JsonResponse(_serialize_task(task), status=201)
 
 def _parse_json_body(request):
     try:
