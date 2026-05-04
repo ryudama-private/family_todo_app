@@ -89,7 +89,7 @@ const onSubmit = async () => {
     }
 
     localStorage.setItem("loggedInFamilyName", data.name);
-    await router.push("/todo");
+    await router.push("/todo/tasks");
   } catch {
     message.value = "予期せぬエラーが発生しました。";
     isError.value = true;
