@@ -1,7 +1,53 @@
 import json
 import pytest
 from django.urls import reverse
-from family.models import Family
+from family.models import Family, Task
+
+@pytest.mark.django_db
+def test_list_tasks_api(client):
+    creator = Family.objects.create(name='creator_list', password='pw1', secret_question='q1', secret_answer='a1')
+    assignee = Family.objects.create(name='assignee_list', password='pw2', secret_question='q2', secret_answer='a2')
+    first_task = Task.objects.create(
+        title='買い物',
+        creator=creator,
+        assignee=assignee,
+        due_date='2026-12-31T00:00:00Z',
+        status='未対応',
+        alarm_minutes=15,
+    )
+    second_task = Task.objects.create(
+        title='掃除',
+        creator=creator,
+        assignee=creator,
+        due_date='2027-01-01T09:00:00Z',
+        status='進行中',
+        alarm_minutes=None,
+    )
+
+    response = client.get(reverse('list_tasks'))
+
+    assert response.status_code == 200
+    data = response.json()
+    assert list(data.keys()) == ['tasks']
+    assert len(data['tasks']) == 2
+    assert data['tasks'][0] == {
+        'id': first_task.id,
+        'title': '買い物',
+        'creator_id': creator.id,
+        'assignee_id': assignee.id,
+        'due_date': '2026-12-31T00:00:00Z',
+        'status': '未対応',
+        'alarm_minutes': 15,
+    }
+    assert data['tasks'][1] == {
+        'id': second_task.id,
+        'title': '掃除',
+        'creator_id': creator.id,
+        'assignee_id': creator.id,
+        'due_date': '2027-01-01T09:00:00Z',
+        'status': '進行中',
+        'alarm_minutes': None,
+    }
 
 @pytest.mark.django_db
 def test_create_task_api(client):

@@ -140,7 +140,8 @@ docker compose down
 | ------ | ------------------------------- | ------------------------ |
 | POST   | /auth/register/                 | 家族アカウントの新規登録 |
 | POST   | /auth/login/                    | ログイン                 |
-| POST   | /auth/todos/                    | タスク新規登録           |
+| GET    | /auth/todos/                    | タスク一覧取得           |
+| POST   | /auth/todos/create/             | タスク新規登録           |
 | PATCH  | /auth/todos/{id}/title/         | タスクのタイトル変更     |
 | PATCH  | /auth/todos/{id}/assignee_id/   | タスクの担当者変更       |
 | PATCH  | /auth/todos/{id}/due_date/      | タスクの期限変更         |
@@ -222,11 +223,39 @@ docker compose down
 }
 ```
 
+### タスク一覧取得API
+
+#### エンドポイント
+
+- GET `/auth/todos/`
+
+#### 概要
+
+登録済みのタスクをすべて取得します。id昇順で返します。
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "テストタスク",
+      "creator_id": 1,
+      "assignee_id": 2,
+      "due_date": "2026-12-31T00:00:00Z",
+      "status": "未対応",
+      "alarm_minutes": null
+    }
+  ]
+}
+```
+
 ### 新規タスク登録API
 
 #### エンドポイント
 
-- POST `/auth/todos/`
+- POST `/auth/todos/create/`
 
 #### 概要
 
@@ -235,7 +264,7 @@ docker compose down
 #### リクエスト例
 
 ```
-POST /auth/todos/
+POST /auth/todos/create/
 Content-Type: application/json
 
 {
