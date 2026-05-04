@@ -23,14 +23,7 @@ def _serialize_task(task):
     }
 
 
-@csrf_exempt
-@require_http_methods(['GET', 'POST'])
-def todos(request):
-    if request.method == 'GET':
-        return list_tasks(request)
-    return create_task(request)
-
-
+@require_http_methods(['GET'])
 def list_tasks(request):
     tasks = Task.objects.select_related('creator', 'assignee').order_by('id')
     return JsonResponse({'tasks': [_serialize_task(task) for task in tasks]}, status=200)
@@ -148,6 +141,9 @@ def update_task_title(request, task_id):
     task.save()
     return JsonResponse({'title': task.title}, status=200)
 
+
+@csrf_exempt
+@require_http_methods(['POST'])
 def create_task(request):
     data, error_response = _parse_json_body(request)
     if error_response:
