@@ -80,7 +80,8 @@ docker compose up --build
 ## 画面構成
 
 - /login: ログイン画面
-- /todo: Todoメイン画面
+- /todo/tasks: TODO一覧画面
+- /todo/calendar: カレンダー画面
 - /family/register: 家族登録画面
 - /: /login にリダイレクト
 

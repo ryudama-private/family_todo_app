@@ -37,7 +37,7 @@ const cleanupFamily = async (request, familyId) => {
 };
 
 test.describe("Login E2E", () => {
-  test("正しい認証情報でログインすると Todo 画面に遷移する", async ({
+  test("正しい認証情報でログインすると /todo/tasks に遷移する", async ({
     page,
     request,
   }) => {
@@ -52,15 +52,19 @@ test.describe("Login E2E", () => {
       await page.getByLabel("パスワード").fill(family.password);
       await page.getByRole("button", { name: "ログイン" }).click();
 
-      await expect(page).toHaveURL(/\/todo$/);
+      await expect(page).toHaveURL(/\/todo\/tasks$/);
       await expect(page.getByLabel("todo-layout")).toBeVisible();
-      await expect(page.getByText("TODO 一覧")).toBeVisible();
+      await expect(
+        page
+          .getByLabel("tasks-view")
+          .getByRole("heading", { name: "TODO 一覧" }),
+      ).toBeVisible();
     } finally {
       await cleanupFamily(request, createdFamilyId);
     }
   });
 
-  test("ログイン後に Todo 画面でログイン中ユーザー名が表示される", async ({
+  test("ログイン後に /todo/tasks でログイン中ユーザー名が表示される", async ({
     page,
     request,
   }) => {
@@ -75,14 +79,14 @@ test.describe("Login E2E", () => {
       await page.getByLabel("パスワード").fill(family.password);
       await page.getByRole("button", { name: "ログイン" }).click();
 
-      await expect(page).toHaveURL(/\/todo$/);
+      await expect(page).toHaveURL(/\/todo\/tasks$/);
       await expect(page.locator(".logged-in-user")).toContainText(family.name);
     } finally {
       await cleanupFamily(request, createdFamilyId);
     }
   });
 
-  test("Todo 画面でログアウトすると /login に戻り保持していた name が削除される", async ({
+  test("/todo/tasks でログアウトすると /login に戻り保持していた name が削除される", async ({
     page,
     request,
   }) => {
@@ -97,7 +101,7 @@ test.describe("Login E2E", () => {
       await page.getByLabel("パスワード").fill(family.password);
       await page.getByRole("button", { name: "ログイン" }).click();
 
-      await expect(page).toHaveURL(/\/todo$/);
+      await expect(page).toHaveURL(/\/todo\/tasks$/);
       await page.getByRole("button", { name: "ログアウト" }).click();
 
       await expect(page).toHaveURL(/\/login$/);
@@ -135,7 +139,7 @@ test.describe("Login E2E", () => {
     }
   });
 
-  test("ログアウト後にブラウザの戻るボタンで /todo に戻れない（履歴置換により保護）", async ({
+  test("ログアウト後にブラウザの戻るボタンで /todo/tasks に戻れない（履歴置換により保護）", async ({
     page,
     request,
   }) => {
@@ -154,7 +158,7 @@ test.describe("Login E2E", () => {
       await page.getByLabel("パスワード").fill(family.password);
       await page.getByRole("button", { name: "ログイン" }).click();
 
-      await expect(page).toHaveURL(/\/todo$/);
+      await expect(page).toHaveURL(/\/todo\/tasks$/);
 
       // ログアウト
       await page.getByRole("button", { name: "ログアウト" }).click();
@@ -163,7 +167,7 @@ test.describe("Login E2E", () => {
       // ブラウザの戻るボタンを押す
       await page.goBack();
 
-      // /login に留まっていることを確認（/todo に戻らない）
+      // /login に留まっていることを確認（/todo/tasks に戻らない）
       await expect(page).toHaveURL(/\/login$/);
     } finally {
       await cleanupFamily(request, createdFamilyId);
