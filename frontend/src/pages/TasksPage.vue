@@ -76,9 +76,9 @@ const formatDueDate = (value) => {
 
 const formatAlarm = (value) => {
   if (!Number.isFinite(value)) return "-";
-  if (value % 1440 === 0) {
-    return `${value / 1440}日前`;
-  }
+  if (value === 0) return "期限切れ";
+  if (value % 1440 === 0) return `${value / 1440}日前`;
+  if (value >= 60) return `${Math.floor(value / 60)}時間前`;
   return `${value}分前`;
 };
 

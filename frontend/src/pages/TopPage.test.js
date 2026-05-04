@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { reactive } from "vue";
-import TodoPage from "./TodoPage.vue";
+import TopPage from "./TopPage.vue";
 
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
@@ -21,9 +21,9 @@ vi.mock("vue-router", async () => {
   };
 });
 
-describe("TodoPage", () => {
-  const mountTodoPage = () =>
-    mount(TodoPage, {
+describe("TopPage", () => {
+  const mountTopPage = () =>
+    mount(TopPage, {
       global: {
         stubs: {
           RouterView: {
@@ -45,7 +45,7 @@ describe("TodoPage", () => {
   });
 
   it("ログインユーザー名が未保存のときはデフォルト文言を表示する", () => {
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     expect(wrapper.get(".logged-in-user").text()).toContain(
       "ログインしている人",
@@ -55,13 +55,13 @@ describe("TodoPage", () => {
   it("ログインユーザー名が保存されているときはその名前を表示する", () => {
     localStorage.setItem("loggedInFamilyName", "お母さん");
 
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     expect(wrapper.get(".logged-in-user").text()).toContain("お母さん");
   });
 
   it("サイドバーのメニューを表示する", () => {
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     const navItems = wrapper.findAll(".nav").map((nav) => nav.text());
     expect(navItems).toContain("TODO 一覧");
@@ -70,13 +70,13 @@ describe("TodoPage", () => {
   });
 
   it("共通レイアウト内にRouterViewを表示する", () => {
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     expect(wrapper.get(".router-view-stub").exists()).toBe(true);
   });
 
   it("カレンダーボタン押下で /todo/calendar へ遷移する", async () => {
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     await wrapper.findAll(".nav")[1].trigger("click");
 
@@ -84,7 +84,7 @@ describe("TodoPage", () => {
   });
   it("ログアウト押下で保存済みユーザー名を削除し /login に遷移する（履歴置換）", async () => {
     localStorage.setItem("loggedInFamilyName", "お母さん");
-    const wrapper = mountTodoPage();
+    const wrapper = mountTopPage();
 
     await wrapper.get(".logout-btn").trigger("click");
 

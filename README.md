@@ -53,13 +53,13 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 
 - frontend/src/pages/LoginPage.vue: ログイン画面
 - frontend/src/pages/FamilyRegisterPage.vue: 家族登録画面
-- frontend/src/pages/TodoPage.vue: Todoレイアウト画面（サイドバー＋RouterView）
+- frontend/src/pages/TopPage.vue: Topレイアウト画面（サイドバー＋RouterView）
 - frontend/src/pages/TasksPage.vue: タスク一覧画面
 - frontend/src/pages/CalendarPage.vue: カレンダー画面
 - frontend/src/router/index.js: 画面ルーティング
 - frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
 - frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
-- frontend/src/pages/TodoPage.test.js: Todo画面のVitest
+- frontend/src/pages/TopPage.test.js: Top画面のVitest
 - frontend/src/pages/TasksPage.test.js: タスク一覧画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
