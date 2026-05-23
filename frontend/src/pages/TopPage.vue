@@ -11,7 +11,7 @@
           <button
             type="button"
             class="nav"
-            :class="{ active: route.path === '/todo/tasks' }"
+            :class="{ active: route.path.startsWith('/todo/tasks') }"
             @click="goToTasks"
           >
             TODO 一覧
