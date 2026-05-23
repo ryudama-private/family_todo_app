@@ -40,6 +40,12 @@ def list_tasks(request):
         status=200,
     )
 
+
+@require_http_methods(['GET'])
+def list_families(request):
+    families = Family.objects.order_by('id').values('id', 'name')
+    return JsonResponse({'families': list(families)}, status=200)
+
 @csrf_exempt
 @require_http_methods(['DELETE'])
 def delete_task(request, task_id):

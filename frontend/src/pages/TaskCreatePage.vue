@@ -11,9 +11,17 @@
 
         <label class="field">
           <span class="field-label">やる人</span>
-          <select class="input">
-            <option>選択してください</option>
+          <select v-model="assigneeId" class="input">
+            <option value="">選択してください</option>
+            <option
+              v-for="family in families"
+              :key="family.id"
+              :value="String(family.id)"
+            >
+              {{ family.name }}
+            </option>
           </select>
+          <p v-if="familyError" class="field-error">{{ familyError }}</p>
         </label>
 
         <label class="field">
@@ -39,6 +47,34 @@
     </div>
   </section>
 </template>
+
+<script setup>
+import { onMounted, ref } from "vue";
+
+const assigneeId = ref("");
+const families = ref([]);
+const familyError = ref("");
+
+const loadFamilies = async () => {
+  familyError.value = "";
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const response = await fetch(`${baseUrl}/auth/families/`);
+    const data = await response.json();
+    if (!response.ok) {
+      familyError.value = data?.error || "家族一覧の取得に失敗しました。";
+      families.value = [];
+      return;
+    }
+    families.value = Array.isArray(data?.families) ? data.families : [];
+  } catch {
+    familyError.value = "家族一覧の取得に失敗しました。";
+    families.value = [];
+  }
+};
+
+onMounted(loadFamilies);
+</script>
 
 <style scoped>
 .panel {
@@ -70,6 +106,12 @@
 .field-label {
   font-size: 0.82rem;
   color: #374151;
+}
+
+.field-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.78rem;
 }
 
 .input {
