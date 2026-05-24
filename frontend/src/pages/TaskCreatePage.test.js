@@ -56,4 +56,20 @@ describe("TaskCreatePage", () => {
 
     expect(wrapper.text()).toContain("取得失敗");
   });
+
+  it("進行状況は未対応・進行中・完了の3択から選べる", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ families: [] }),
+    });
+
+    const wrapper = mount(TaskCreatePage);
+    await flushPromises();
+    await nextTick();
+
+    const statusSelect = wrapper.findAll("select")[1];
+    const statusOptions = statusSelect.findAll("option").map((o) => o.text());
+
+    expect(statusOptions).toEqual(["未対応", "進行中", "完了"]);
+  });
 });

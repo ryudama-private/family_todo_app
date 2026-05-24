@@ -31,7 +31,11 @@
 
         <label class="field">
           <span class="field-label">進行状況</span>
-          <input type="text" class="input" />
+          <select v-model="status" class="input">
+            <option value="未対応">未対応</option>
+            <option value="進行中">進行中</option>
+            <option value="完了">完了</option>
+          </select>
         </label>
 
         <label class="field">
@@ -52,6 +56,7 @@
 import { onMounted, ref } from "vue";
 
 const assigneeId = ref("");
+const status = ref("未対応");
 const families = ref([]);
 const familyError = ref("");
 
