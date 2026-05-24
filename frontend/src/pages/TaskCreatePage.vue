@@ -26,7 +26,14 @@
 
         <label class="field">
           <span class="field-label">期限</span>
-          <input type="text" class="input" />
+          <VueDatePicker
+            v-model="dueDate"
+            :locale="ja"
+            :enable-time-picker="true"
+            :format="'yyyy/MM/dd HH:mm'"
+            placeholder=""
+            class="date-picker"
+          />
         </label>
 
         <label class="field">
@@ -54,9 +61,13 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import { ja } from "date-fns/locale";
 
 const assigneeId = ref("");
 const status = ref("未対応");
+const dueDate = ref(null);
 const families = ref([]);
 const familyError = ref("");
 
@@ -83,6 +94,7 @@ onMounted(loadFamilies);
 
 <style scoped>
 .panel {
+  --form-control-text: #1f2937;
   min-height: 100%;
   padding: 28px;
   box-sizing: border-box;
@@ -124,7 +136,31 @@ onMounted(loadFamilies);
   border: 1px solid #6b7280;
   padding: 0 8px;
   font: inherit;
+  color: var(--form-control-text);
   background: #fff;
+}
+
+.date-picker {
+  width: 100%;
+}
+
+:deep(.dp__input) {
+  height: 30px;
+  border: 1px solid #6b7280;
+  border-radius: 0;
+  padding: 0 8px;
+  font: inherit;
+  color: var(--form-control-text);
+  box-shadow: none;
+}
+
+:deep(.dp__input::placeholder) {
+  color: var(--form-control-text);
+  opacity: 1;
+}
+
+:deep(.dp__input_icon) {
+  pointer-events: none;
 }
 
 .actions {

@@ -3,6 +3,7 @@ import { nextTick } from "vue";
 import TaskCreatePage from "./TaskCreatePage.vue";
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+const mountTaskCreatePage = () => mount(TaskCreatePage, { shallow: true });
 
 describe("TaskCreatePage", () => {
   let originalFetch;
@@ -26,7 +27,7 @@ describe("TaskCreatePage", () => {
       }),
     });
 
-    const wrapper = mount(TaskCreatePage);
+    const wrapper = mountTaskCreatePage();
     await flushPromises();
     await nextTick();
 
@@ -34,6 +35,7 @@ describe("TaskCreatePage", () => {
       "タスク新規作成",
     );
     expect(wrapper.get("[aria-label='task-create-form']").exists()).toBe(true);
+    expect(wrapper.text()).toContain("期限");
     const options = wrapper
       .findAll("select option")
       .map((option) => option.text());
@@ -50,7 +52,7 @@ describe("TaskCreatePage", () => {
       json: async () => ({ error: "取得失敗" }),
     });
 
-    const wrapper = mount(TaskCreatePage);
+    const wrapper = mountTaskCreatePage();
     await flushPromises();
     await nextTick();
 
@@ -63,7 +65,7 @@ describe("TaskCreatePage", () => {
       json: async () => ({ families: [] }),
     });
 
-    const wrapper = mount(TaskCreatePage);
+    const wrapper = mountTaskCreatePage();
     await flushPromises();
     await nextTick();
 
