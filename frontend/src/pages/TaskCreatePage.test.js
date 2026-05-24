@@ -36,6 +36,13 @@ describe("TaskCreatePage", () => {
     );
     expect(wrapper.get("[aria-label='task-create-form']").exists()).toBe(true);
     expect(wrapper.text()).toContain("期限");
+    expect(wrapper.text()).toContain("アラーム");
+    expect(wrapper.findAll(".date-picker")).toHaveLength(1);
+    expect(wrapper.text()).toContain("何分前にアラームをかけますか");
+    expect(wrapper.text()).toContain("未設定");
+    expect(wrapper.text()).toContain("30分前");
+    expect(wrapper.text()).toContain("1時間前");
+    expect(wrapper.text()).toContain("1日前");
     const options = wrapper
       .findAll("select option")
       .map((option) => option.text());

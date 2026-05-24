@@ -47,7 +47,18 @@
 
         <label class="field">
           <span class="field-label">アラーム</span>
-          <input type="text" class="input" />
+          <p class="field-help">何分前にアラームをかけますか</p>
+          <select v-model="alarmMinutes" class="input">
+            <option value="">選択してください</option>
+            <option value="none">未設定</option>
+            <option
+              v-for="minutes in alarmMinuteOptions"
+              :key="minutes"
+              :value="String(minutes)"
+            >
+              {{ formatAlarmLead(minutes) }}
+            </option>
+          </select>
         </label>
 
         <div class="actions">
@@ -68,8 +79,16 @@ import { ja } from "date-fns/locale";
 const assigneeId = ref("");
 const status = ref("未対応");
 const dueDate = ref(null);
+const alarmMinutes = ref("");
 const families = ref([]);
 const familyError = ref("");
+const alarmMinuteOptions = [5, 10, 15, 30, 60, 120, 180, 360, 720, 1440];
+
+const formatAlarmLead = (value) => {
+  if (value % 1440 === 0) return `${value / 1440}日前`;
+  if (value % 60 === 0) return `${value / 60}時間前`;
+  return `${value}分前`;
+};
 
 const loadFamilies = async () => {
   familyError.value = "";
@@ -128,6 +147,12 @@ onMounted(loadFamilies);
 .field-error {
   margin: 0;
   color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.field-help {
+  margin: 0;
+  color: #374151;
   font-size: 0.78rem;
 }
 
