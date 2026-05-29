@@ -83,11 +83,13 @@ describe("TopPage", () => {
     expect(pushMock).toHaveBeenCalledWith("/todo/calendar");
   });
   it("ログアウト押下で保存済みユーザー名を削除し /login に遷移する（履歴置換）", async () => {
+    localStorage.setItem("loggedInFamilyId", "1");
     localStorage.setItem("loggedInFamilyName", "お母さん");
     const wrapper = mountTopPage();
 
     await wrapper.get(".logout-btn").trigger("click");
 
+    expect(localStorage.getItem("loggedInFamilyId")).toBeNull();
     expect(localStorage.getItem("loggedInFamilyName")).toBeNull();
     expect(replaceMock).toHaveBeenCalledWith("/login");
   });

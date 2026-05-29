@@ -62,6 +62,7 @@ const goToCalendar = async () => {
 };
 
 const onLogout = async () => {
+  localStorage.removeItem("loggedInFamilyId");
   localStorage.removeItem("loggedInFamilyName");
   await router.replace("/login");
 };

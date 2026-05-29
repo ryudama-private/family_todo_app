@@ -88,6 +88,7 @@ const onSubmit = async () => {
       return;
     }
 
+    localStorage.setItem("loggedInFamilyId", String(data.id));
     localStorage.setItem("loggedInFamilyName", data.name);
     await router.push("/todo/tasks");
   } catch {
