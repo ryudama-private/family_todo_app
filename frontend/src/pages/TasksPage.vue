@@ -6,6 +6,11 @@
     <p v-else-if="errorMessage" class="panel-copy error">{{ errorMessage }}</p>
 
     <div v-else class="table-wrap">
+      <div class="table-actions">
+        <RouterLink class="create-label" to="/todo/tasks/create"
+          >+新規作成</RouterLink
+        >
+      </div>
       <table class="tasks-table" aria-label="tasks-table">
         <thead>
           <tr>
@@ -112,6 +117,23 @@ onMounted(loadTasks);
 .table-wrap {
   margin-top: 16px;
   overflow-x: auto;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.create-label {
+  text-decoration: none;
+  font-weight: 700;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.create-label:hover {
+  text-decoration: underline;
 }
 
 .tasks-table {

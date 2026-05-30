@@ -3,6 +3,17 @@ import { nextTick } from "vue";
 import TasksPage from "./TasksPage.vue";
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
+const mountTasksPage = () =>
+  mount(TasksPage, {
+    global: {
+      stubs: {
+        RouterLink: {
+          props: ["to"],
+          template: '<a :href="to"><slot /></a>',
+        },
+      },
+    },
+  });
 
 describe("TasksPage", () => {
   let originalFetch;
@@ -35,7 +46,7 @@ describe("TasksPage", () => {
       }),
     });
 
-    const wrapper = mount(TasksPage);
+    const wrapper = mountTasksPage();
     await flushPromises();
     await nextTick();
 
@@ -56,7 +67,7 @@ describe("TasksPage", () => {
       json: async () => ({ error: "取得失敗" }),
     });
 
-    const wrapper = mount(TasksPage);
+    const wrapper = mountTasksPage();
     await flushPromises();
     await nextTick();
 

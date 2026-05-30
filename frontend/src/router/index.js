@@ -4,6 +4,7 @@ import FamilyRegisterPage from "../pages/FamilyRegisterPage.vue";
 import TopPage from "../pages/TopPage.vue";
 import TasksPage from "../pages/TasksPage.vue";
 import CalendarPage from "../pages/CalendarPage.vue";
+import TaskCreatePage from "../pages/TaskCreatePage.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -14,6 +15,7 @@ const routes = [
     children: [
       { path: "", redirect: "/todo/tasks" },
       { path: "tasks", name: "tasks", component: TasksPage },
+      { path: "tasks/create", name: "task-create", component: TaskCreatePage },
       { path: "calendar", name: "calendar", component: CalendarPage },
     ],
   },

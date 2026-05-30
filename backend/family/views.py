@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from .models import Task, Family
 
+ALLOWED_TASK_STATUSES = {'未対応', '進行中', '完了'}
+
 
 def _serialize_task(task):
     return {
@@ -39,6 +41,12 @@ def list_tasks(request):
         },
         status=200,
     )
+
+
+@require_http_methods(['GET'])
+def list_families(request):
+    families = Family.objects.order_by('id').values('id', 'name')
+    return JsonResponse({'families': list(families)}, status=200)
 
 @csrf_exempt
 @require_http_methods(['DELETE'])
@@ -101,11 +109,14 @@ def update_task_status(request, task_id):
     status = data.get('status')
     if not isinstance(status, str) or not status.strip():
         return JsonResponse({'error': 'statusは必須です'}, status=400)
+    normalized_status = status.strip()
+    if normalized_status not in ALLOWED_TASK_STATUSES:
+        return JsonResponse({'error': 'statusは未対応・進行中・完了のいずれかで指定してください'}, status=400)
     try:
         task = Task.objects.get(id=task_id)
     except Task.DoesNotExist:
         return JsonResponse({'error': '指定されたタスクが存在しません'}, status=404)
-    task.status = status.strip()
+    task.status = normalized_status
     task.save()
     return JsonResponse({'status': task.status}, status=200)
 
@@ -172,6 +183,13 @@ def create_task(request):
     due_date = parse_datetime(data['due_date'])
     if due_date is None:
         return JsonResponse({'error': 'due_dateの形式が不正です'}, status=400)
+    if not isinstance(data['status'], str):
+        return JsonResponse({'error': 'statusは必須です'}, status=400)
+    normalized_status = data['status'].strip()
+    if not normalized_status:
+        return JsonResponse({'error': 'statusは必須です'}, status=400)
+    if normalized_status not in ALLOWED_TASK_STATUSES:
+        return JsonResponse({'error': 'statusは未対応・進行中・完了のいずれかで指定してください'}, status=400)
     alarm_minutes = data.get('alarm_minutes')
     if alarm_minutes == '':
         alarm_minutes = None
@@ -180,7 +198,7 @@ def create_task(request):
         creator=creator,
         assignee=assignee,
         due_date=due_date,
-        status=data['status'],
+        status=normalized_status,
         alarm_minutes=alarm_minutes
     )
     return JsonResponse(_serialize_task(task), status=201)
