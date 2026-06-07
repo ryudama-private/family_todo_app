@@ -67,6 +67,9 @@ def test_update_task_status_api(client):
     response = client.patch(url, data=json.dumps({'status': '進行中'}), content_type='application/json')
     assert response.status_code == 200
     assert response.json()['status'] == '進行中'
+    # 許可値以外はエラー
+    response = client.patch(url, data=json.dumps({'status': '保留中'}), content_type='application/json')
+    assert response.status_code == 400
     # 空文字はエラー
     response = client.patch(url, data=json.dumps({'status': '  '}), content_type='application/json')
     assert response.status_code == 400

@@ -21,6 +21,7 @@ describe("router", () => {
 
     expect(paths).toContain("/todo");
     expect(paths).toContain("/todo/tasks");
+    expect(paths).toContain("/todo/tasks/create");
     expect(paths).toContain("/todo/calendar");
   });
 });

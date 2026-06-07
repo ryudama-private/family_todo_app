@@ -55,15 +55,19 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 - frontend/src/pages/FamilyRegisterPage.vue: 家族登録画面
 - frontend/src/pages/TopPage.vue: Topレイアウト画面（サイドバー＋RouterView）
 - frontend/src/pages/TasksPage.vue: タスク一覧画面
+- frontend/src/pages/TaskCreatePage.vue: タスク新規作成画面
 - frontend/src/pages/CalendarPage.vue: カレンダー画面
 - frontend/src/router/index.js: 画面ルーティング
 - frontend/src/pages/LoginPage.test.js: ログイン画面のVitest
 - frontend/src/pages/FamilyRegisterPage.test.js: 家族登録画面のVitest
 - frontend/src/pages/TopPage.test.js: Top画面のVitest
 - frontend/src/pages/TasksPage.test.js: タスク一覧画面のVitest
+- frontend/src/pages/TaskCreatePage.test.js: タスク新規作成画面のVitest
 - frontend/src/router/index.test.js: ルーター設定のVitest
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
 - frontend/e2e/login.spec.js: ログイン画面のPlaywright E2E
+- frontend/e2e/task-create.spec.js: タスク新規作成画面のPlaywright E2E
+- frontend/e2e/task-delete.spec.js: タスク削除のPlaywright E2E
 - frontend/playwright.config.js: Playwright設定
 
 ## 起動方法
@@ -84,6 +88,7 @@ docker compose up --build
 
 - /login: ログイン画面
 - /todo/tasks: TODO一覧画面
+- /todo/tasks/create: タスク新規作成画面
 - /todo/calendar: カレンダー画面
 - /family/register: 家族登録画面
 - /: /login にリダイレクト
@@ -97,8 +102,10 @@ docker compose up --build
 ### 現在のログアウト仕様
 
 - サーバーセッションやトークンは未使用
+- ログイン成功時に `localStorage` へ `loggedInFamilyId` を保存
 - ログイン成功時に `localStorage` へ `loggedInFamilyName` を保存
-- ログアウト時に `loggedInFamilyName` を削除し `/login` へ遷移
+- タスク新規作成時の `creator_id` は `loggedInFamilyId` を使用
+- ログアウト時に `loggedInFamilyId` と `loggedInFamilyName` を削除し `/login` へ遷移
 
 ## DBの中身を確認する方法
 
@@ -144,6 +151,7 @@ docker compose down
 | ------ | ------------------------------- | ------------------------ |
 | POST   | /auth/register/                 | 家族アカウントの新規登録 |
 | POST   | /auth/login/                    | ログイン                 |
+| GET    | /auth/families/                 | 家族一覧取得             |
 | GET    | /auth/todos/                    | タスク一覧取得           |
 | POST   | /auth/todos/create/             | タスク新規登録           |
 | PATCH  | /auth/todos/{id}/title/         | タスクのタイトル変更     |
@@ -257,6 +265,33 @@ docker compose down
 }
 ```
 
+### 家族一覧取得API
+
+#### エンドポイント
+
+- GET `/auth/families/`
+
+#### 概要
+
+登録済みの family を id 昇順で返します。タスク新規作成画面の「やる人」プルダウンに使用します。
+
+#### レスポンス例（200 OK）
+
+```json
+{
+  "families": [
+    {
+      "id": 1,
+      "name": "お母さん"
+    },
+    {
+      "id": 2,
+      "name": "お父さん"
+    }
+  ]
+}
+```
+
 ### 新規タスク登録API
 
 #### エンドポイント
@@ -286,7 +321,7 @@ Content-Type: application/json
 - `creator_id` : 作成者のfamily.id（整数, 必須）
 - `assignee_id` : 担当者のfamily.id（整数, 必須）
 - `due_date` : 期限（ISO8601形式の日時文字列, 必須）
-- `status` : 進行状況（例: "未対応"、"完了" など, 必須)
+- `status` : 進行状況（`"未対応"` / `"進行中"` / `"完了"` のいずれか, 必須）
 
 #### レスポンス例（201 Created）
 
@@ -325,6 +360,14 @@ Content-Type: application/json
 ```
 {
   "error": "due_dateの形式が不正です"
+}
+```
+
+- statusが不正
+
+```json
+{
+  "error": "statusは未対応・進行中・完了のいずれかで指定してください"
 }
 ```
 
@@ -455,7 +498,7 @@ Content-Type: application/json
 }
 ```
 
-- `status` : 新しい進行状況（文字列, 必須, 空文字不可）
+- `status` : 新しい進行状況（`"未対応"` / `"進行中"` / `"完了"` のいずれか, 必須）
 
 #### レスポンス例（200 OK）
 
@@ -472,6 +515,14 @@ Content-Type: application/json
 ```json
 {
   "error": "statusは必須です"
+}
+```
+
+- statusが不正
+
+```json
+{
+  "error": "statusは未対応・進行中・完了のいずれかで指定してください"
 }
 ```
 
@@ -677,7 +728,7 @@ docker compose exec frontend sh -c "npm run test:watch"
 
 ### E2Eテスト
 
-Playwright で家族登録画面とログイン画面の総合テストを実行できます。
+Playwright で家族登録画面・ログイン画面・タスク新規作成画面・タスク削除の総合テストを実行できます。
 
 現在の E2E は、登録成功後に作成した family レコードの id を使って cleanup を行うため、テストが追加したデータだけを終了時に自動削除します。
 
@@ -729,18 +780,19 @@ docker compose run --rm e2e
 
 - LoginPageのタイトル、入力欄、ログインボタン、家族追加リンク
 - FamilyRegisterPageのタイトル、入力欄、登録ボタン
-- TodoPageのサイドバー表示、メニュー表示、ログアウトボタン表示
+- TopPageのサイドバー表示、メニュー表示、ログアウトボタン表示
 - 各フォームへの入力と送信ボタン押下
 - ルーターの画面遷移設定（/login, /todo, /family/register）と / から /login へのリダイレクト
 - 家族登録画面で入力して登録完了メッセージが表示されるE2E
-- 正しい認証情報でログイン後に /todo へ遷移するE2E
+- 正しい認証情報でログイン後に /todo/tasks へ遷移するE2E
 - 誤ったパスワードでログイン失敗メッセージが表示されるE2E
 - ログイン後に Todo画面でログイン中ユーザー名が表示されるE2E
-- Todo画面でログアウトすると /login に戻り、保持していた name が削除されるE2E
+- Top画面でログアウトすると /login に戻り、保持していた name と id が削除されるE2E
+- タスク新規作成画面で入力して保存し、一覧に表示されるE2E
 - タスク新規登録APIのテスト（正常系・バリデーション・エラー系）
 - タスクタイトル変更APIのテスト（正常系・空文字エラー・存在しないIDの404）
 - タスク担当者変更APIのテスト（正常系・キーなしエラー・存在しないassignee_idエラー・存在しないタスクIDの404）
 - タスク期限変更APIのテスト（正常系・空文字エラー・キーなしエラー・形式不正エラー・存在しないタスクIDの404）
 - タスクアラーム時間変更APIのテスト（正常系・アラーム解除（null）・キーなしエラー・負値エラー・文字列エラー・存在しないタスクIDの404）
-- タスク進行状況変更APIのテスト（正常系・空文字エラー・キーなしエラー・存在しないタスクIDの404）
+- タスク進行状況変更APIのテスト（正常系・許可値外エラー・空文字エラー・キーなしエラー・存在しないタスクIDの404）
 - タスク削除APIのテスト（正常系・DBから削除されることの確認・存在しないタスクIDの404）

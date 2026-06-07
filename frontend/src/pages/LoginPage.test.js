@@ -85,6 +85,7 @@ describe("LoginPage", () => {
         }),
       },
     );
+    expect(localStorage.getItem("loggedInFamilyId")).toBe("1");
     expect(localStorage.getItem("loggedInFamilyName")).toBe("テスト太郎");
     expect(pushMock).toHaveBeenCalledWith("/todo/tasks");
   });

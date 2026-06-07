@@ -11,7 +11,7 @@
           <button
             type="button"
             class="nav"
-            :class="{ active: route.path === '/todo/tasks' }"
+            :class="{ active: route.path.startsWith('/todo/tasks') }"
             @click="goToTasks"
           >
             TODO 一覧
@@ -62,6 +62,7 @@ const goToCalendar = async () => {
 };
 
 const onLogout = async () => {
+  localStorage.removeItem("loggedInFamilyId");
   localStorage.removeItem("loggedInFamilyName");
   await router.replace("/login");
 };

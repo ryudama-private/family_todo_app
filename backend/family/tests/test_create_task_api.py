@@ -154,3 +154,19 @@ def test_create_task_api_invalid_due_date_format_returns_400(client):
     }
     response = client.post(url, data=json.dumps(payload), content_type='application/json')
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_task_api_invalid_status_returns_400(client):
+    creator = Family.objects.create(name='creator_invalid_status', password='pw1', secret_question='q1', secret_answer='a1')
+    assignee = Family.objects.create(name='assignee_invalid_status', password='pw2', secret_question='q2', secret_answer='a2')
+    url = reverse('create_task')
+    payload = {
+        'title': 'タスク',
+        'creator_id': creator.id,
+        'assignee_id': assignee.id,
+        'due_date': '2026-12-31T00:00:00Z',
+        'status': '保留中'
+    }
+    response = client.post(url, data=json.dumps(payload), content_type='application/json')
+    assert response.status_code == 400
