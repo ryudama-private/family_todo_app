@@ -67,6 +67,7 @@ Django (backend) + Vue.js (frontend) を Docker Compose で動かす家族向け
 - frontend/e2e/family-register.spec.js: 家族登録画面のPlaywright E2E
 - frontend/e2e/login.spec.js: ログイン画面のPlaywright E2E
 - frontend/e2e/task-create.spec.js: タスク新規作成画面のPlaywright E2E
+- frontend/e2e/task-delete.spec.js: タスク削除のPlaywright E2E
 - frontend/playwright.config.js: Playwright設定
 
 ## 起動方法
@@ -727,7 +728,7 @@ docker compose exec frontend sh -c "npm run test:watch"
 
 ### E2Eテスト
 
-Playwright で家族登録画面・ログイン画面・タスク新規作成画面の総合テストを実行できます。
+Playwright で家族登録画面・ログイン画面・タスク新規作成画面・タスク削除の総合テストを実行できます。
 
 現在の E2E は、登録成功後に作成した family レコードの id を使って cleanup を行うため、テストが追加したデータだけを終了時に自動削除します。
 
