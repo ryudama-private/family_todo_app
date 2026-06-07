@@ -20,7 +20,7 @@
             <th>期限</th>
             <th>進行状況</th>
             <th>アラーム</th>
-            <th class="action-head" aria-hidden="true"></th>
+            <th class="action-head" aria-label="操作"></th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@
               <button
                 type="button"
                 class="delete-btn"
-                :disabled="deletingTaskId === task.id"
+                :disabled="deletingTaskId !== null"
                 @click="deleteTask(task.id)"
               >
                 削除
