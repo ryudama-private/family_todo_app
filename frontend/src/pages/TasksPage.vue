@@ -20,11 +20,12 @@
             <th>期限</th>
             <th>進行状況</th>
             <th>アラーム</th>
+            <th class="action-head" aria-label="操作"></th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="tasks.length === 0">
-            <td colspan="6" class="empty">タスクがありません</td>
+            <td colspan="7" class="empty">タスクがありません</td>
           </tr>
           <tr v-for="task in tasks" :key="task.id">
             <td>{{ task.title }}</td>
@@ -33,6 +34,16 @@
             <td>{{ formatDueDate(task.due_date) }}</td>
             <td>{{ task.status }}</td>
             <td>{{ formatAlarm(task.alarm_minutes) }}</td>
+            <td class="action-cell">
+              <button
+                type="button"
+                class="delete-btn"
+                :disabled="deletingTaskId !== null"
+                @click="deleteTask(task.id)"
+              >
+                削除
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -46,6 +57,7 @@ import { onMounted, ref } from "vue";
 const tasks = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref("");
+const deletingTaskId = ref(null);
 
 const loadTasks = async () => {
   isLoading.value = true;
@@ -65,6 +77,32 @@ const loadTasks = async () => {
     tasks.value = [];
   } finally {
     isLoading.value = false;
+  }
+};
+
+const deleteTask = async (taskId) => {
+  if (deletingTaskId.value !== null) return;
+
+  deletingTaskId.value = taskId;
+  errorMessage.value = "";
+
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const response = await fetch(`${baseUrl}/auth/todos/${taskId}/`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      errorMessage.value = data?.error || "タスクの削除に失敗しました。";
+      return;
+    }
+
+    tasks.value = tasks.value.filter((task) => task.id !== taskId);
+  } catch {
+    errorMessage.value = "タスクの削除に失敗しました。";
+  } finally {
+    deletingTaskId.value = null;
   }
 };
 
@@ -139,7 +177,7 @@ onMounted(loadTasks);
 .tasks-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 0.95rem;
 }
 
@@ -154,6 +192,40 @@ onMounted(loadTasks);
 .tasks-table th {
   background: #e5e7eb;
   font-weight: 700;
+}
+
+.action-head {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.action-cell {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  padding: 0 0 0 12px;
+  border: 0;
+  background: transparent;
+  text-align: center;
+}
+
+.action-cell .delete-btn {
+  width: 48px;
+  height: 28px;
+  border: 1px solid #4b5563;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  cursor: pointer;
+}
+
+.action-cell .delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .empty {

@@ -59,6 +59,7 @@ describe("TasksPage", () => {
     expect(wrapper.text()).toContain("お母さん");
     expect(wrapper.text()).toContain("未対応");
     expect(wrapper.text()).toContain("30分前");
+    expect(wrapper.text()).toContain("削除");
   });
 
   it("取得失敗時にエラーメッセージを表示する", async () => {
@@ -72,5 +73,121 @@ describe("TasksPage", () => {
     await nextTick();
 
     expect(wrapper.text()).toContain("取得失敗");
+  });
+
+  it("削除ボタン押下でDELETE APIを呼び出し、対象行を一覧から消す", async () => {
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          tasks: [
+            {
+              id: 1,
+              title: "ゴミ捨て",
+              creator_id: 1,
+              creator_name: "お母さん",
+              assignee_id: 1,
+              assignee_name: "お母さん",
+              due_date: "2026-07-15T07:00:00Z",
+              status: "未対応",
+              alarm_minutes: 30,
+            },
+            {
+              id: 2,
+              title: "買い物",
+              creator_id: 1,
+              creator_name: "お母さん",
+              assignee_id: 2,
+              assignee_name: "お父さん",
+              due_date: "2026-07-16T07:00:00Z",
+              status: "進行中",
+              alarm_minutes: null,
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ deleted_id: 1 }),
+      });
+
+    const wrapper = mountTasksPage();
+    await flushPromises();
+    await nextTick();
+
+    const firstDeleteButton = wrapper.findAll(".delete-btn")[0];
+    await firstDeleteButton.trigger("click");
+    await flushPromises();
+    await nextTick();
+
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      expect.stringMatching(/\/auth\/todos\/1\/$/),
+      {
+        method: "DELETE",
+      },
+    );
+    expect(wrapper.text()).not.toContain("ゴミ捨て");
+    expect(wrapper.text()).toContain("買い物");
+  });
+
+  it("削除中は全ての削除ボタンがdisabledになる", async () => {
+    let resolveDelete;
+    const pendingDeletePromise = new Promise((resolve) => {
+      resolveDelete = resolve;
+    });
+
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          tasks: [
+            {
+              id: 1,
+              title: "ゴミ捨て",
+              creator_id: 1,
+              creator_name: "お母さん",
+              assignee_id: 1,
+              assignee_name: "お母さん",
+              due_date: "2026-07-15T07:00:00Z",
+              status: "未対応",
+              alarm_minutes: 30,
+            },
+            {
+              id: 2,
+              title: "買い物",
+              creator_id: 1,
+              creator_name: "お母さん",
+              assignee_id: 2,
+              assignee_name: "お父さん",
+              due_date: "2026-07-16T07:00:00Z",
+              status: "進行中",
+              alarm_minutes: null,
+            },
+          ],
+        }),
+      })
+      .mockImplementationOnce(() => pendingDeletePromise);
+
+    const wrapper = mountTasksPage();
+    await flushPromises();
+    await nextTick();
+
+    const deleteButtons = wrapper.findAll(".delete-btn");
+    await deleteButtons[0].trigger("click");
+    await nextTick();
+
+    expect(deleteButtons[0].attributes("disabled")).toBeDefined();
+    expect(deleteButtons[1].attributes("disabled")).toBeDefined();
+
+    resolveDelete({
+      ok: true,
+      json: async () => ({ deleted_id: 1 }),
+    });
+
+    await flushPromises();
+    await nextTick();
   });
 });
