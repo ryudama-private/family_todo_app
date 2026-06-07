@@ -35,7 +35,14 @@
             <td>{{ task.status }}</td>
             <td>{{ formatAlarm(task.alarm_minutes) }}</td>
             <td class="action-cell">
-              <button type="button" class="delete-btn">削除</button>
+              <button
+                type="button"
+                class="delete-btn"
+                :disabled="deletingTaskId === task.id"
+                @click="deleteTask(task.id)"
+              >
+                削除
+              </button>
             </td>
           </tr>
         </tbody>
@@ -50,6 +57,7 @@ import { onMounted, ref } from "vue";
 const tasks = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref("");
+const deletingTaskId = ref(null);
 
 const loadTasks = async () => {
   isLoading.value = true;
@@ -69,6 +77,32 @@ const loadTasks = async () => {
     tasks.value = [];
   } finally {
     isLoading.value = false;
+  }
+};
+
+const deleteTask = async (taskId) => {
+  if (deletingTaskId.value !== null) return;
+
+  deletingTaskId.value = taskId;
+  errorMessage.value = "";
+
+  try {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    const response = await fetch(`${baseUrl}/auth/todos/${taskId}/`, {
+      method: "DELETE",
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      errorMessage.value = data?.error || "タスクの削除に失敗しました。";
+      return;
+    }
+
+    tasks.value = tasks.value.filter((task) => task.id !== taskId);
+  } catch {
+    errorMessage.value = "タスクの削除に失敗しました。";
+  } finally {
+    deletingTaskId.value = null;
   }
 };
 
@@ -187,6 +221,11 @@ onMounted(loadTasks);
   color: #111827;
   font: inherit;
   cursor: pointer;
+}
+
+.action-cell .delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .empty {
