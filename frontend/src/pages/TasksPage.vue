@@ -20,11 +20,12 @@
             <th>期限</th>
             <th>進行状況</th>
             <th>アラーム</th>
+            <th class="action-head" aria-hidden="true"></th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="tasks.length === 0">
-            <td colspan="6" class="empty">タスクがありません</td>
+            <td colspan="7" class="empty">タスクがありません</td>
           </tr>
           <tr v-for="task in tasks" :key="task.id">
             <td>{{ task.title }}</td>
@@ -33,6 +34,9 @@
             <td>{{ formatDueDate(task.due_date) }}</td>
             <td>{{ task.status }}</td>
             <td>{{ formatAlarm(task.alarm_minutes) }}</td>
+            <td class="action-cell">
+              <button type="button" class="delete-btn">削除</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -139,7 +143,7 @@ onMounted(loadTasks);
 .tasks-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 0.95rem;
 }
 
@@ -154,6 +158,35 @@ onMounted(loadTasks);
 .tasks-table th {
   background: #e5e7eb;
   font-weight: 700;
+}
+
+.action-head {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.action-cell {
+  width: 72px;
+  min-width: 72px;
+  max-width: 72px;
+  padding: 0 0 0 12px;
+  border: 0;
+  background: transparent;
+  text-align: center;
+}
+
+.action-cell .delete-btn {
+  width: 48px;
+  height: 28px;
+  border: 1px solid #4b5563;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  cursor: pointer;
 }
 
 .empty {

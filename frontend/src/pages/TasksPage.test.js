@@ -59,6 +59,7 @@ describe("TasksPage", () => {
     expect(wrapper.text()).toContain("お母さん");
     expect(wrapper.text()).toContain("未対応");
     expect(wrapper.text()).toContain("30分前");
+    expect(wrapper.text()).toContain("削除");
   });
 
   it("取得失敗時にエラーメッセージを表示する", async () => {
