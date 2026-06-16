@@ -35,9 +35,10 @@
             <td>{{ task.status }}</td>
             <td>{{ formatAlarm(task.alarm_minutes) }}</td>
             <td class="action-cell">
+              <button type="button" class="action-btn">編集</button>
               <button
                 type="button"
-                class="delete-btn"
+                class="action-btn delete-btn"
                 :disabled="deletingTaskId !== null"
                 @click="deleteTask(task.id)"
               >
@@ -195,25 +196,27 @@ onMounted(loadTasks);
 }
 
 .action-head {
-  width: 72px;
-  min-width: 72px;
-  max-width: 72px;
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
   padding: 0;
   border: 0;
   background: transparent;
 }
 
 .action-cell {
-  width: 72px;
-  min-width: 72px;
-  max-width: 72px;
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
   padding: 0 0 0 12px;
   border: 0;
   background: transparent;
   text-align: center;
+  white-space: nowrap;
 }
 
-.action-cell .delete-btn {
+.action-cell .action-btn {
+  display: inline-block;
   width: 48px;
   height: 28px;
   border: 1px solid #4b5563;
@@ -223,7 +226,11 @@ onMounted(loadTasks);
   cursor: pointer;
 }
 
-.action-cell .delete-btn:disabled {
+.action-cell .action-btn + .action-btn {
+  margin-left: 8px;
+}
+
+.action-cell .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
